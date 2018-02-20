@@ -70,14 +70,14 @@ Mario.prototype.collisionX = function(map,posX){
 	// マリオの右側
 	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.rightMapX])){
 		// (加算される前の)中心点からの距離を見る
-		var vecX = Math.abs((this.posX + (MAP_SIZE / 2)) - ((this.rightMapX * MAP_SIZE) + (MAP_SIZE / 2)));
+		var vecX = Math.abs((this.posX + (HALF_MAP_SIZE)) - ((this.rightMapX * MAP_SIZE) + HALF_MAP_SIZE));
 		// Xの加算量調整
 		this.addPosX = Math.abs(MAP_SIZE - vecX);
 	}
 	// マリオの左側
 	else if(isObjectMap(map[this.downMapY][this.leftMapX]) || isObjectMap(map[this.upMapY][this.leftMapX])){
 		// (加算される前の)中心点からの距離を見る
-		var vecX = Math.abs((this.posX + (MAP_SIZE / 2)) - ((this.leftMapX * MAP_SIZE) + (MAP_SIZE / 2)));
+		var vecX = Math.abs((this.posX + HALF_MAP_SIZE) - ((this.leftMapX * MAP_SIZE) + HALF_MAP_SIZE));
 		// Xの加算量調整
 		this.addPosX = -Math.abs(MAP_SIZE - vecX);
 	}
