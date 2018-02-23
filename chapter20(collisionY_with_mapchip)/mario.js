@@ -3,6 +3,7 @@ function Mario(posX,posY){
 	this.NORMAL_JUMP_POWER = 10;
 	this.DASH_JUMP_POWER = 13;
 	this.addPosX = 0;
+	this.addPosY = 0;
 	this.posX = posX;
 	this.posY = posY;
 	// どのタイミングでアニメーションを切り替えるか
