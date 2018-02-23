@@ -33,7 +33,7 @@ var gMapChip = [
 [0,0,0,0,0,64,64,64,64,64,64,64,64,64,64,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 [112,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,114],
 [128,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,130]
 ];
@@ -202,22 +202,22 @@ function move(){
 	if(gLeftPush){
     if(gSpacePush){
         gMario.setIsDash(true);
-		    gMario.moveX(-DASH_SPEED);
+		    gMario.moveX(gMapChip,-DASH_SPEED);
     }
     else{
       gMario.setIsDash(false);
-      gMario.moveX(-NORMAL_SPPED);
+      gMario.moveX(gMapChip,-NORMAL_SPPED);
     }
 	}
 	// →キーが押されている状態
 	if(gRightPush){
     if(gSpacePush){
         gMario.setIsDash(true);
-		    gMario.moveX(DASH_SPEED);
+		    gMario.moveX(gMapChip,DASH_SPEED);
     }
     else{
       gMario.setIsDash(false);
-      gMario.moveX(NORMAL_SPPED);
+      gMario.moveX(gMapChip,NORMAL_SPPED);
     }
 	}
 

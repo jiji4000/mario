@@ -10,3 +10,4 @@ var GRAVITY_POWER = 1;
 // 最大の重力量
 var MAX_GRAVITY = 8;
 var MAP_SIZE = 32;
+var HALF_MAP_SIZE = 16;
