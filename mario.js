@@ -3,6 +3,7 @@ function Mario(posX,posY){
 	this.NORMAL_JUMP_POWER = 10;
 	this.DASH_JUMP_POWER = 13;
 	this.addPosX = 0;
+	this.addPosY = 0;
 	this.posX = posX;
 	this.posY = posY;
 	// どのタイミングでアニメーションを切り替えるか
@@ -48,6 +49,7 @@ Mario.prototype.moveX = function(mapChip,moveX){
 		this.direction = LEFT_DIR;
 	}
 	this.posX += this.addPosX;
+	this.updateMapPositionX(this.posX);
 	// ダッシュ時のアニメーションは早くする
 	var cnt = this.isDash ? 2 : 1;
 	this.animCnt += cnt;
@@ -83,9 +85,11 @@ Mario.prototype.setJumpSettings = function(isDash){
 	ジャンプ動作
 	isPush : 対象のキーが押されているか
 */
-Mario.prototype.jumpAction = function(isPush){
+Mario.prototype.jumpAction = function(isPush,mapChip){
 	if(this.isJump){
-		this.posY -= this.jumpPower;
+		this.addPosY = this.jumpPower;
+		this.collisionY(mapChip,this.posY - this.addPosY);
+		this.posY -= this.addPosY;
 		// 落下量調整
 		if(this.jumpPower > -MAX_GRAVITY){
 			// 上昇中かつキーが押されている場合は下降量を減らす
@@ -95,14 +99,7 @@ Mario.prototype.jumpAction = function(isPush){
 				this.jumpPower -= GRAVITY_POWER;
 			}
 		}
-		console.log("jumpPower = " + this.jumpPower)
-		// 地面についた時
-		if(this.posY >= 384){
-			this.posY = 384;
-			this.isJump = false;
-			this.animOffsetX = 0;
-		}
-
+		console.log("jumpPower = " + this.jumpPower);
 	}
 }
 
@@ -132,30 +129,36 @@ Mario.prototype.updateMapPositionX = function(posX){
 }
 
 /**
+	chapter20
+	Y軸方向のマップチップの更新
+*/
+Mario.prototype.updateMapPositionY = function(posY){
+	// y
+	this.upMapY = Math.floor(posY / MAP_SIZE);
+	this.downMapY = Math.floor((posY + MAP_SIZE - 1) / MAP_SIZE);
+
+	// 配列外チェック
+	if(this.upMapY >= MAX_MAP_Y - 1){
+		this.upMapY = MAX_MAP_Y - 1;
+	}
+	if(this.upMapY < 0){
+		this.upMapY = 0;
+	}
+	if(this.downMapY >= MAX_MAP_Y - 1){
+		this.downMapY = MAX_MAP_Y - 1;
+	}
+	if(this.downMapY < 0){
+		this.downMapY = 0;
+	}
+}
+
+/**
 	chapter17
 	マップチップ座標を更新する
 */
 Mario.prototype.updateMapPosition = function(){
 	this.updateMapPositionX(this.posX);
-
-	// y座標
-	this.upMapY = Math.floor(this.posY / MAP_SIZE);
-	this.downMapY = Math.floor((this.posY + MAP_SIZE - 1) / MAP_SIZE);
-
-	// 配列外チェック
-	if(this.upMapY >= MAX_MAP_Y){
-		this.upMapY = MAX_MAP_Y;
-	}
-	if(this.upMapY < 0){
-		this.upMapY = 0;
-	}
-	if(this.downMapY >= MAX_MAP_Y){
-		this.downMapY = MAX_MAP_Y;
-	}
-	if(this.downMapY < 0){
-		this.downMapY = 0;
-	}
-
+	this.updateMapPositionY(this.posY);
 	// log
 	console.log("rightMapX = " + this.rightMapX + ", leftMapX = " + this.leftMapX + ",upMapY = " + this.upMapY + ",this.downMapY = "
 		+ this.downMapY);
@@ -180,5 +183,36 @@ Mario.prototype.collisionX = function(map,posX){
 		// (加算される前の)中心点からの距離を取る
 		var vecX = Math.abs((this.posX + HALF_MAP_SIZE) - ((this.leftMapX * MAP_SIZE) + HALF_MAP_SIZE));
 		this.addPosX = -Math.abs(MAP_SIZE - vecX);
+	}
+}
+
+/**
+	chapter20
+	オブジェクトとの当たり判定Y
+*/
+Mario.prototype.collisionY = function(map,posY){
+	this.updateMapPositionY(posY);
+	// マリオの上側に当たった場合
+	if(isObjectMap(map[this.upMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.leftMapX])){
+		// (加算される前の)中心点からの距離をみる
+		var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
+		// Yの加算量調整
+		this.addPosY = Math.abs(MAP_SIZE - vecY);
+		// 落下させる
+		this.jumpPower = 0;
+	}
+	// マリオの下側
+	else if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){
+		// (加算される前の)中心点からの距離を見る
+		var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
+		// Yの加算量調整
+		this.addPosY = Math.abs(MAP_SIZE - vecY);
+		// 地面についた
+		this.posY += this.addPosY;
+		this.addPosY = 0;
+		this.jumpPower = 0;
+		this.isJump = false;
+		// リセットアニメーション
+		this.animOffsetX = 0;
 	}
 }

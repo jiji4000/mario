@@ -227,7 +227,7 @@ function move(){
     gMario.setJumpSettings(gSpacePush);
   }
   // ジャンプ処理
-  gMario.jumpAction(gUpPush);
+  gMario.jumpAction(gUpPush,gMapChip);
 }
 
 /*
