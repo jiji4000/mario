@@ -86,21 +86,24 @@ Mario.prototype.setJumpSettings = function(isDash){
 	isPush : 対象のキーが押されているか
 */
 Mario.prototype.jumpAction = function(isPush,mapChip){
-	if(this.isJump){
-		this.addPosY = this.jumpPower;
-		this.collisionY(mapChip,this.posY - this.addPosY);
-		this.posY -= this.addPosY;
-		// 落下量調整
-		if(this.jumpPower > -MAX_GRAVITY){
-			// 上昇中かつキーが押されている場合は下降量を減らす
-			if(isPush && this.jumpPower > 0){
-				this.jumpPower -= (GRAVITY_POWER - (GRAVITY_POWER / 2));
-			}else{
-				this.jumpPower -= GRAVITY_POWER;
-			}
-		}
-		console.log("jumpPower = " + this.jumpPower);
+	this.addPosY = this.jumpPower;
+	this.collisionY(mapChip,this.posY - this.addPosY);
+	this.posY -= this.addPosY;
+	// 落下中はジャンプさせないようにする
+	if(this.addPosY < 0){
+		this.isJump = true;
 	}
+
+	// 落下量調整
+	if(this.jumpPower > -MAX_GRAVITY){
+		// 上昇中かつキーが押されている場合は下降量を減らす
+		if(isPush && this.jumpPower > 0){
+			this.jumpPower -= (GRAVITY_POWER - (GRAVITY_POWER / 2));
+		}else{
+			this.jumpPower -= GRAVITY_POWER;
+		}
+	}
+	console.log("jumpPower = " + this.jumpPower);
 }
 
 /**
