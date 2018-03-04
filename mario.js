@@ -247,6 +247,7 @@ Mario.prototype.doMapScrollX = function(){
 		this.maxDrawMapX = MAX_MAP_X + Math.floor((this.mapScrollX + HALF_MAP_SIZE) / MAP_SIZE);			// 最大の描画範囲X
 		if(this.maxDrawMapX > 100) this.maxDrawMapX = 100;
 		this.minDrawMapX = this.maxDrawMapX - DRAW_MAX_MAP_X;								// 最小の描画範囲X
+		// 中央固定を止める
 		this.posX = this.moveNumX - this.mapScrollX;
 	}
 }
