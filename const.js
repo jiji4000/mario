@@ -11,3 +11,8 @@ var GRAVITY_POWER = 1;
 var MAX_GRAVITY = 8;
 var MAP_SIZE = 32;
 var HALF_MAP_SIZE = 16;
+// Chapter22 Scroll
+// x座標のスクロール開始地点
+var SCROLL_POINT_X = (640 / 2) - (MAP_SIZE / 2);
+// マップチップの最大描画範囲(画面外+1のマップチップチップも描画させる)
+var DRAW_MAX_MAP_X = MAX_MAP_X + 1;

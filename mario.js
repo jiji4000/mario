@@ -24,6 +24,12 @@ function Mario(posX,posY){
 	this.leftMapX = 0;
 	this.upMapY = 0;
 	this.downMapY = 0;
+	// chapter22スクロール処理
+	this.maxDrawMapX = DRAW_MAX_MAP_X;			// 最大の描画範囲X
+	this.minDrawMapX = 0;		// 最小の描画範囲X
+	this.mapScrollX = 0;		// スクロール量X
+	this.moveNumX = 0;			// 総移動量X
+	this.scrollEndX = (100 - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
 }
 
 /*
@@ -49,6 +55,7 @@ Mario.prototype.moveX = function(mapChip,moveX){
 		this.direction = LEFT_DIR;
 	}
 	this.posX += this.addPosX;
+	this.moveNumX += this.addPosX;
 	this.updateMapPositionX(this.posX);
 	// ダッシュ時のアニメーションは早くする
 	var cnt = this.isDash ? 2 : 1;
@@ -217,5 +224,29 @@ Mario.prototype.collisionY = function(map,posY){
 		this.isJump = false;
 		// リセットアニメーション
 		this.animOffsetX = 0;
+	}
+}
+
+/**
+	chapter22 スクロール処理
+*/
+Mario.prototype.doMapScrollX = function(){
+	// スクロール基準点を越えたら
+	if(this.moveNumX >= SCROLL_POINT_X && this.moveNumX < this.scrollEndX)
+	{
+		this.mapScrollX = this.moveNumX - SCROLL_POINT_X;		// マップスクロール量
+		this.posX = SCROLL_POINT_X;							// 固定
+		// マップを描画する範囲をずらす
+		this.maxDrawMapX = DRAW_MAX_MAP_X + Math.floor(this.mapScrollX / MAP_SIZE);			// 最大の描画範囲X
+		this.minDrawMapX = this.maxDrawMapX - DRAW_MAX_MAP_X;								// 最小の描画範囲X
+	}
+	// スクロールの終点まで来たらスクロールを止め る
+	else if(this.moveNumX >= this.scrollEndX)
+	{
+		this.mapScrollX = this.scrollEndX - SCROLL_POINT_X;		// マップスクロール量
+		this.maxDrawMapX = MAX_MAP_X + Math.floor((this.mapScrollX + HALF_MAP_SIZE) / MAP_SIZE);			// 最大の描画範囲X
+		if(this.maxDrawMapX > 100) this.maxDrawMapX = 100;
+		this.minDrawMapX = this.maxDrawMapX - DRAW_MAX_MAP_X;								// 最小の描画範囲X
+		this.posX = this.moveNumX - this.mapScrollX;
 	}
 }
