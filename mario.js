@@ -69,7 +69,6 @@ Mario.prototype.moveX = function(mapChip,moveX){
 			this.animX = 0;
 		}
 	}
-
 }
 
 Mario.prototype.setIsDash = function(isDash){
