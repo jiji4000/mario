@@ -45,7 +45,7 @@ Mario.prototype.moveX = function(mapChip,moveX){
 	// 加算量を代入する
 	this.addPosX = moveX;
 	// 移動後の加算量を渡すマップチップの状況に応じてx方向の加算量を決める
-	this.collisionX(mapChip,this.posX + this.addPosX);
+	this.collisionX(mapChip,this.moveNumX + this.addPosX);
 
 	// 移動方向変える
 	if(moveX > 0){
@@ -56,7 +56,7 @@ Mario.prototype.moveX = function(mapChip,moveX){
 	}
 	this.posX += this.addPosX;
 	this.moveNumX += this.addPosX;
-	this.updateMapPositionX(this.posX);
+	this.updateMapPositionX(this.moveNumX);
 	// ダッシュ時のアニメーションは早くする
 	var cnt = this.isDash ? 2 : 1;
 	this.animCnt += cnt;
@@ -123,14 +123,14 @@ Mario.prototype.updateMapPositionX = function(posX){
 	this.rightMapX = Math.floor((posX + MAP_SIZE - 1) / MAP_SIZE);
 
 	// 配列外チェック
-	if(this.leftMapX >= MAX_MAP_X){
-		this.leftMapX = MAX_MAP_X;
+	if(this.leftMapX >= MAX_MAP_CHIP_X){
+		this.leftMapX = MAX_MAP_CHIP_X - 1;
 	}
 	if(this.leftMapX < 0){
 		this.leftMapX = 0;
 	}
-	if(this.rightMapX >= MAX_MAP_X){
-		this.rightMapX = MAX_MAP_X;
+	if(this.rightMapX >= MAX_MAP_CHIP_X){
+		this.rightMapX = MAX_MAP_CHIP_X - 1;
 	}
 	if(this.rightMapX < 0){
 		this.rightMapX = 0;
@@ -166,7 +166,7 @@ Mario.prototype.updateMapPositionY = function(posY){
 	マップチップ座標を更新する
 */
 Mario.prototype.updateMapPosition = function(){
-	this.updateMapPositionX(this.posX);
+	this.updateMapPositionX(this.moveNumX);
 	this.updateMapPositionY(this.posY);
 	// log
 	console.log("rightMapX = " + this.rightMapX + ", leftMapX = " + this.leftMapX + ",upMapY = " + this.upMapY + ",this.downMapY = "
@@ -184,13 +184,13 @@ Mario.prototype.collisionX = function(map,posX){
 	// マリオの右側
 	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.rightMapX])){
 		// (加算される前の)中心点からの距離を取る
-		var vecX = Math.abs((this.posX + HALF_MAP_SIZE) - ((this.rightMapX * MAP_SIZE) + HALF_MAP_SIZE));
+		var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.rightMapX * MAP_SIZE) + HALF_MAP_SIZE));
 		this.addPosX = Math.abs(MAP_SIZE - vecX);
 	}
 	// マリオの左側
 	else if(isObjectMap(map[this.downMapY][this.leftMapX]) || isObjectMap(map[this.upMapY][this.leftMapX])){
 		// (加算される前の)中心点からの距離を取る
-		var vecX = Math.abs((this.posX + HALF_MAP_SIZE) - ((this.leftMapX * MAP_SIZE) + HALF_MAP_SIZE));
+		var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.leftMapX * MAP_SIZE) + HALF_MAP_SIZE));
 		this.addPosX = -Math.abs(MAP_SIZE - vecX);
 	}
 }
@@ -244,7 +244,7 @@ Mario.prototype.doMapScrollX = function(){
 	{
 		this.mapScrollX = this.scrollEndX - SCROLL_POINT_X;		// マップスクロール量
 		this.maxDrawMapX = MAX_MAP_X + Math.floor((this.mapScrollX + HALF_MAP_SIZE) / MAP_SIZE);			// 最大の描画範囲X
-		if(this.maxDrawMapX > 100) this.maxDrawMapX = 100;
+		if(this.maxDrawMapX > MAX_MAP_CHIP_X) this.maxDrawMapX = MAX_MAP_CHIP_X;
 		this.minDrawMapX = this.maxDrawMapX - DRAW_MAX_MAP_X;								// 最小の描画範囲X
 		// 中央固定を止める
 		this.posX = this.moveNumX - this.mapScrollX;

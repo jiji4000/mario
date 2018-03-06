@@ -16,3 +16,6 @@ var HALF_MAP_SIZE = 16;
 var SCROLL_POINT_X = (640 / 2) - (MAP_SIZE / 2);
 // マップチップの最大描画範囲(画面外+1のマップチップチップも描画させる)
 var DRAW_MAX_MAP_X = MAX_MAP_X + 1;
+// chapter23
+// 最大のマップチップ量X
+var MAX_MAP_CHIP_X = 100;
