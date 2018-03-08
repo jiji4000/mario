@@ -4,8 +4,11 @@ var g_Ctx;
 // texture
 var gMarioTex;
 var gMapTex;
+// chapter24
+var gKuriboTex;
 
 var gMario;
+var gKuribo;
 
 // key
 var gSpacePush = false; // space
@@ -55,6 +58,7 @@ onload = function () {
     loadTexture();
     // mario
     gMario = new Mario(0,384);
+    gKuribo = new Kuribo(216,384);
 
     // キーの登録
     window.addEventListener('keydown', keyDown, true);
@@ -70,6 +74,8 @@ function loadTexture(){
 	gMarioTex.src = "resource/main.png";
   gMapTex = new Image();
   gMapTex.src = "resource/map512.png";
+  gKuriboTex = new Image();
+  gKuriboTex.src = "resource/slime.png"
 }
 
 function animate(now) {
@@ -172,9 +178,8 @@ window.requestNextAnimationFrame =
 */
 function Draw(){
   drawMap(gMapChip);
-	//g_Ctx.drawImage(gMarioTex,0,0,24,24,gMarioPosX,gMarioPosY,24,24);
 	gMario.draw(g_Ctx,gMarioTex);
-
+  gKuribo.draw(g_Ctx,gKuriboTex);
 }
 
 /**
