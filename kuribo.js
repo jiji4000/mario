@@ -1,7 +1,7 @@
 function Kuribo(posX,posY,dir){
 	this.posX = posX;
 	this.posY = posY;
-	// chapter25追加
+	// chapter25敵の移動
 	this.addNumX = 0;
 	// どのタイミングでアニメーションを切り替えるか
 	this.animCnt = 0;
