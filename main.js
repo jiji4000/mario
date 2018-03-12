@@ -58,7 +58,7 @@ onload = function () {
     loadTexture();
     // mario
     gMario = new Mario(0,384);
-    gKuribo = new Kuribo(216,384);
+    gKuribo = new Kuribo(608,384,LEFT_DIR);
 
     // キーの登録
     window.addEventListener('keydown', keyDown, true);
@@ -179,7 +179,7 @@ window.requestNextAnimationFrame =
 function Draw(){
   drawMap(gMapChip);
 	gMario.draw(g_Ctx,gMarioTex);
-  gKuribo.draw(g_Ctx,gKuriboTex);
+  gKuribo.draw(g_Ctx,gKuriboTex,gMario.mapScrollX);
 }
 
 /**
@@ -236,6 +236,12 @@ function move(){
 
   // scroll処理
   gMario.doMapScrollX();
+
+  enemyMove();
+}
+
+function enemyMove(){
+  gKuribo.move(gMapChip,1);
 }
 
 /*
