@@ -14,6 +14,7 @@ function Kuribo(posX,posY,dir){
 	描画関数
 	ctx:context
 	texture:img class
+	scrollX:X軸のスクロール量
 */
 Kuribo.prototype.draw = function(ctx,texture,scrollX){
 	ctx.drawImage(texture, (this.animX * 32) + (this.direction * 128),32,32,32,this.posX - scrollX,this.posY,32,32);
@@ -22,7 +23,7 @@ Kuribo.prototype.draw = function(ctx,texture,scrollX){
 /*
 	動かす役割
 
-	posX = メインキャラのX座標
+	moveNum:移動量
 */
 Kuribo.prototype.move = function(mapChip,moveNum){
 	// 向きにより加算量を調整する
