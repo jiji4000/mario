@@ -2,7 +2,7 @@ function Kuribo(posX,posY,dir){
 	this.posX = posX;
 	this.posY = posY;
 	// chapter25敵の移動
-	this.addNumX = 0;
+	this.addPosX = 0;
 	// どのタイミングでアニメーションを切り替えるか
 	this.animCnt = 0;
 	// 切り出す始点のX座標
