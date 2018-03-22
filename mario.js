@@ -30,6 +30,9 @@ function Mario(posX,posY){
 	this.mapScrollX = 0;		// スクロール量X
 	this.moveNumX = 0;			// 総移動量X
 	this.scrollEndX = (100 - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
+	// chapter27
+	this.state = NORMAL_STATE;
+	this.height = 32;
 }
 
 /*
@@ -249,4 +252,85 @@ Mario.prototype.doMapScrollX = function(){
 		// 中央固定を止める
 		this.posX = this.moveNumX - this.mapScrollX;
 	}
+}
+
+/*
+	敵と当たった時のアクション
+*/
+Mario.prototype.collisionWithEnemy = function(){
+	this.state = DEAD_ACTION;
+	this.addPosY = 14;
+}
+
+/**
+	死亡演出
+*/
+Mario.prototype.deadAction = function(){
+	if(this.state == DEAD_ACTION)
+	{
+		this.posY -= this.addPosY;		// 上昇と下降
+		if(this.addPosY >= -MAX_GRAVITY)
+		{
+			this.addPosY -= 1;
+		}
+		if(this.posY > 480)
+		{
+			this.state = DEAD;		// 死亡
+		}
+	}
+}
+
+/**
+	マリオの死亡判定を返す
+*/
+Mario.prototype.isDead = function(){
+	if(this.state >= DEAD_ACTION){
+		return true;
+	}
+	return false;
+}
+
+/**
+	マリオの更新関数
+*/
+Mario.prototype.update = function(mapChip){
+	if(!this.isDead()){
+	  // マップ座標の更新
+	  this.updateMapPosition();
+		// 左キーが押されている状態
+		if(gLeftPush){
+	    if(gSpacePush){
+	        this.setIsDash(true);
+			    this.moveX(mapChip,-DASH_SPEED);
+	    }
+	    else{
+	      this.setIsDash(false);
+	      this.moveX(mapChip,-NORMAL_SPPED);
+	    }
+		}
+		// →キーが押されている状態
+		if(gRightPush){
+	    if(gSpacePush){
+	        this.setIsDash(true);
+			    this.moveX(mapChip,DASH_SPEED);
+	    }
+	    else{
+	      this.setIsDash(false);
+	      this.moveX(mapChip,NORMAL_SPPED);
+	    }
+		}
+
+	  // ジャンプ動作
+	  if(gUpPush){
+	    // ジャンプ設定をオンにする
+	    this.setJumpSettings(gSpacePush);
+	  }
+	  // ジャンプ処理
+	  this.jumpAction(gUpPush,mapChip);
+
+	  // scroll処理
+	  this.doMapScrollX();
+	}
+	// 死亡後処理
+	this.deadAction();
 }

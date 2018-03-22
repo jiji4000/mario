@@ -13,7 +13,9 @@ function Kuribo(posX,posY,dir){
 	this.leftMapX = 0;
 	this.upMapY = 0;
 	this.downMapY = 0;
-
+	// chapter27
+	this.state = NORMAL_STATE;
+	this.height = 16;
 }
 
 /*
@@ -130,4 +132,34 @@ Kuribo.prototype.collisionX = function(map,posX){
 		this.addPosX = -Math.abs(MAP_SIZE - vecX);
 		this.direction = RIGHT_DIR;
 	}
+}
+
+/*
+	chapter27
+	キャラクターとの当たり判定
+	mario:キャラクタークラス
+*/
+Kuribo.prototype.collisionWithMario = function(map,mario){
+	if(!mario.isDead()){
+		// x軸
+		if(mario.moveNumX < this.posX + 32 && mario.moveNumX + 32 > this.posX)
+		{
+			// マリオの上とクリボの下
+			if(mario.posY < this.posY + this.height){
+				// マリオの下とクリボの上
+			 	if(mario.posY + mario.height > this.posY ){
+					mario.collisionWithEnemy(map);
+				}
+			}
+		}
+	}
+}
+
+/*
+	chapter27
+	クリボの更新処理
+*/
+Kuribo.prototype.update = function(map,mario,moveNum){
+	this.move(map,moveNum);
+	this.collisionWithMario(map,mario);
 }

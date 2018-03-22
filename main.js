@@ -201,47 +201,13 @@ function drawMap(map){
 
 
 function move(){
-  // マップ座標の更新
-  gMario.updateMapPosition();
-	// 左キーが押されている状態
-	if(gLeftPush){
-    if(gSpacePush){
-        gMario.setIsDash(true);
-		    gMario.moveX(gMapChip,-DASH_SPEED);
-    }
-    else{
-      gMario.setIsDash(false);
-      gMario.moveX(gMapChip,-NORMAL_SPPED);
-    }
-	}
-	// →キーが押されている状態
-	if(gRightPush){
-    if(gSpacePush){
-        gMario.setIsDash(true);
-		    gMario.moveX(gMapChip,DASH_SPEED);
-    }
-    else{
-      gMario.setIsDash(false);
-      gMario.moveX(gMapChip,NORMAL_SPPED);
-    }
-	}
-
-  // ジャンプ動作
-  if(gUpPush){
-    // ジャンプ設定をオンにする
-    gMario.setJumpSettings(gSpacePush);
-  }
-  // ジャンプ処理
-  gMario.jumpAction(gUpPush,gMapChip);
-
-  // scroll処理
-  gMario.doMapScrollX();
+  gMario.update(gMapChip);
 
   enemyMove();
 }
 
 function enemyMove(){
-  gKuribo.move(gMapChip,1);
+  gKuribo.update(gMapChip,gMario,1);
 }
 
 /*
