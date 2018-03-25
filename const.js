@@ -25,4 +25,4 @@ var DEAD_ACTION = 100;
 var DEAD = 101;
 // chapter28
 var DEAD_ANIM_FRAME = 180;
-var STEP_UP_NUM = 22;
+var STEP_UP_NUM = 13;

@@ -160,7 +160,7 @@ Kuribo.prototype.collisionWithMario = function(map,mario){
 						this.state = DEAD_ACTION;
 						this.animY = 64;
 						this.direction = LEFT_DIR;
-						mario.jumpPower += STEP_UP_NUM;
+						mario.jumpPower = STEP_UP_NUM;
 					}
 				 	else{
 						mario.collisionWithEnemy(map);
