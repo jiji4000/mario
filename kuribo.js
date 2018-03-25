@@ -7,6 +7,7 @@ function Kuribo(posX,posY,dir){
 	this.animCnt = 0;
 	// 切り出す始点のX座標
 	this.animX = 0;
+	this.animY = 0;
 	this.direction = dir;
 	// マップチップ座標
 	this.rightMapX = 0;
@@ -16,6 +17,7 @@ function Kuribo(posX,posY,dir){
 	// chapter27
 	this.state = NORMAL_STATE;
 	this.height = 16;
+	this.deadCnt = 0;
 }
 
 /*
@@ -25,7 +27,9 @@ function Kuribo(posX,posY,dir){
 	scrollX:X軸のスクロール量
 */
 Kuribo.prototype.draw = function(ctx,texture,scrollX){
-	ctx.drawImage(texture, (this.animX * 32) + (this.direction * 128),32,32,32,this.posX - scrollX,this.posY,32,32);
+	if(this.state != DEAD){
+		ctx.drawImage(texture, (this.animX * 32) + (this.direction * 128),this.animY,32,32,this.posX - scrollX,this.posY,32,32);
+	}
 }
 
 /*
@@ -144,11 +148,23 @@ Kuribo.prototype.collisionWithMario = function(map,mario){
 		// x軸
 		if(mario.moveNumX < this.posX + 32 && mario.moveNumX + 32 > this.posX)
 		{
-			// マリオの上とクリボの下
-			if(mario.posY < this.posY + this.height){
+			// マリオの上とクリボの下(クリボは32*32で切り取られているので、最下部は32+される)
+			if(mario.posY < this.posY + 32){
 				// マリオの下とクリボの上
-			 	if(mario.posY + mario.height > this.posY ){
-					mario.collisionWithEnemy(map);
+				// 踏みつけ判定(キャラの半分より上の場合踏みつけと判定させる)
+				// マリオの下がクリボの上よりも下にある
+				if(mario.posY + mario.height > this.posY + (32 - this.height)){
+					// マリオの下がクリボの中間地点よりも上にある
+					if(mario.posY + mario.height <= this.posY + (32 - this.height) + (this.height / 2)){
+						// 潰れたアニメーションにする
+						this.state = DEAD_ACTION;
+						this.animY = 64;
+						this.direction = LEFT_DIR;
+						mario.jumpPower += STEP_UP_NUM;
+					}
+				 	else{
+						mario.collisionWithEnemy(map);
+					}
 				}
 			}
 		}
@@ -160,6 +176,33 @@ Kuribo.prototype.collisionWithMario = function(map,mario){
 	クリボの更新処理
 */
 Kuribo.prototype.update = function(map,mario,moveNum){
-	this.move(map,moveNum);
-	this.collisionWithMario(map,mario);
+	if(!this.isDead()){
+		this.move(map,moveNum);
+		this.collisionWithMario(map,mario);
+	}
+	this.deadAction();
+}
+
+/**
+	chapter28
+	死亡時のアニメーション
+*/
+Kuribo.prototype.deadAction = function(){
+	if(this.state == DEAD_ACTION)
+	{
+		if(this.deadCnt++ == DEAD_ANIM_FRAME){
+			this.state = DEAD;
+		}
+	}
+}
+
+/**
+	chapter28
+	死亡判定
+*/
+Kuribo.prototype.isDead = function(){
+	if(this.state >= DEAD_ACTION){
+		return true;
+	}
+	return false;
 }

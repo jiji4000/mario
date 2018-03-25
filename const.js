@@ -23,3 +23,6 @@ var MAX_MAP_CHIP_X = 100;
 var NORMAL_STATE = 1;
 var DEAD_ACTION = 100;
 var DEAD = 101;
+// chapter28
+var DEAD_ANIM_FRAME = 180;
+var STEP_UP_NUM = 22;
