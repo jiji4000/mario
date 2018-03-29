@@ -196,7 +196,9 @@ window.requestNextAnimationFrame =
 	描画
 */
 function Draw(){
-  drawBackGround(gBackGroundMapChip);
+  // 背景
+  drawMap(gBackGroundMapChip);
+  // オブジェクト
   drawMap(gMapChip);
 	gMario.draw(g_Ctx,gMarioTex);
   gKuribo.draw(g_Ctx,gKuriboTex,gMario.mapScrollX);
@@ -208,23 +210,6 @@ function Draw(){
   map:対象のマップチップ配列
 */
 function drawMap(map){
-  // y軸
-  for(var y = 0;y < MAX_MAP_Y;++y){
-    // x軸
-    for(var x = gMario.minDrawMapX;x < gMario.maxDrawMapX;++x){
-      var indexX = 32 * ((map[y][x] + 16) % 16);
-      var indexY = 32 * Math.floor(map[y][x] / 16);
-      g_Ctx.drawImage(gMapTex,indexX,indexY,32,32,x * 32 - gMario.mapScrollX,y * 32,32,32);
-    }
-  }
-}
-
-/**
-  背景の描画
-
-  map:対象の背景マップチップ
-*/
-function drawBackGround(map){
   // y軸
   for(var y = 0;y < MAX_MAP_Y;++y){
     // x軸
