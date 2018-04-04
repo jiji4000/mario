@@ -33,6 +33,9 @@ function Mario(posX,posY){
 	// chapter27
 	this.state = NORMAL_STATE;
 	this.height = 32;
+  // chapter30
+  this.coinNum = 0;
+  this.playerNum = 3;
 }
 
 /*
@@ -60,6 +63,8 @@ Mario.prototype.moveX = function(mapChip,moveX){
 	this.posX += this.addPosX;
 	this.moveNumX += this.addPosX;
 	this.updateMapPositionX(this.moveNumX);
+  // マップチップアイテムオブジェクトとの当たり判定
+  this.collisionWithMapItem(mapChip);
 	// ダッシュ時のアニメーションは早くする
 	var cnt = this.isDash ? 2 : 1;
 	this.animCnt += cnt;
@@ -227,6 +232,36 @@ Mario.prototype.collisionY = function(map,posY){
 		// リセットアニメーション
 		this.animOffsetX = 0;
 	}
+}
+
+/**
+  アイテムマップチップオブジェクトとの当たり判定
+*/
+Mario.prototype.collisionWithMapItem = function(map){
+  var mapsX = [this.rightMapX,this.leftMapX];
+  var mapsY = [this.upMapY,this.downMapY];
+  for(var y = 0;y < 2;++y){
+    for(var x = 0;x < 2;++x){
+      // コインとの当たり判定
+      if(isCoinMap(map[mapsY[y]][mapsX[x]])){
+        // マップチップと空のマップを入れ替える
+        replaceEmptyMap(map,mapsX[x],mapsY[y]);
+        // コインを取得した時の処理
+        this.getCoin();
+      }
+    }
+  }
+}
+
+/**
+  コインを取得した時の処理
+*/
+Mario.prototype.getCoin = function(){
+  // コインを100枚とったら1upさせる
+  if(++this.coinNum > 100){
+    this.coinNum = 0;
+    this.playerNum++;
+  }
 }
 
 /**
