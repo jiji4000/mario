@@ -63,8 +63,6 @@ Mario.prototype.moveX = function(mapChip,moveX){
 	this.posX += this.addPosX;
 	this.moveNumX += this.addPosX;
 	this.updateMapPositionX(this.moveNumX);
-  // マップチップアイテムオブジェクトとの当たり判定
-  this.collisionWithMapItem(mapChip);
 	// ダッシュ時のアニメーションは早くする
 	var cnt = this.isDash ? 2 : 1;
 	this.animCnt += cnt;
@@ -362,7 +360,8 @@ Mario.prototype.update = function(mapChip){
 	  }
 	  // ジャンプ処理
 	  this.jumpAction(gUpPush,mapChip);
-
+    // マップチップアイテムオブジェクトとの当たり判定
+    this.collisionWithMapItem(mapChip);
 	  // scroll処理
 	  this.doMapScrollX();
 	}
