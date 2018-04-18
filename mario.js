@@ -256,7 +256,7 @@ Mario.prototype.collisionWithMapItem = function(map){
 */
 Mario.prototype.getCoin = function(){
   // コインを100枚とったら1upさせる
-  if(++this.coinNum > 100){
+  if(++this.coinNum >= 100){
     this.coinNum = 0;
     this.playerNum++;
   }

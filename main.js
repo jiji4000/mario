@@ -6,6 +6,8 @@ var gMarioTex;
 var gMapTex;
 // chapter24
 var gKuriboTex;
+// chapter31
+var gCoinTex;
 
 var gMario;
 var gKuribo;
@@ -95,6 +97,8 @@ function loadTexture(){
   gMapTex.src = "resource/map512.png";
   gKuriboTex = new Image();
   gKuriboTex.src = "resource/slime.png"
+  gCoinTex = new Image();
+  gCoinTex.src = "resource/white_number.png";
 }
 
 function animate(now) {
@@ -202,6 +206,8 @@ function Draw(){
   drawMap(gMapChip);
 	gMario.draw(g_Ctx,gMarioTex);
   gKuribo.draw(g_Ctx,gKuriboTex,gMario.mapScrollX);
+
+  drawCoin(630,10,gMario.coinNum);
 }
 
 /**
@@ -220,6 +226,24 @@ function drawMap(map){
         g_Ctx.drawImage(gMapTex,indexX,indexY,32,32,x * 32 - gMario.mapScrollX,y * 32,32,32);
       }
     }
+  }
+}
+
+/**
+	コインの枚数の描画
+*/
+function drawCoin(posX,posY,coinNum){
+  var digits = getDigits(coinNum);	// 桁数を取得
+  var maxNumber = getMaxNumber(digits);
+  // 描画位置
+  var numberPosX = posX - (digits * 25);
+  // 全て描画するまで
+  while(maxNumber >= 1){
+    // 一番上の桁数から描画する
+    g_Ctx.drawImage(gCoinTex, Math.floor((coinNum / maxNumber )) * 20,0,20,17, numberPosX,posY, 20, 17);
+    coinNum -= Math.floor((coinNum / maxNumber)) * maxNumber;				// 一番上の桁数を引く(111だったら100を引く)
+    maxNumber = Math.floor(maxNumber / 10);		// 111 = 11にする
+    numberPosX += 25;
   }
 }
 
