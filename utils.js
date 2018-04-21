@@ -23,7 +23,7 @@ function getMaxNumber(digits){
   var maxNum = 1;
   while(digits > 1){
     maxNum *= 10;
-    digits = Math.floor(digits / 10);
+    digits--;
   }
   return maxNum;
 }
