@@ -12,6 +12,9 @@ var gCoinTex;
 var gMario;
 var gKuribo;
 
+var gMapAnimFrame = 0;
+var gMapAnimOffsetX = 0;
+
 // key
 var gSpacePush = false; // space
 var gLeftPush = false;	// left
@@ -61,6 +64,9 @@ var gBackGroundMapChip = [
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 ];
+
+// アニメーションマップチップを入れる
+var ANIM_MAP_CHIPS = [33];
 
 /**
 	onload
@@ -194,7 +200,6 @@ window.requestNextAnimationFrame =
 )
 ();
 
-
 /*
 	Draw
 	描画
@@ -203,11 +208,12 @@ function Draw(){
   // 背景
   drawMap(gBackGroundMapChip);
   // オブジェクト
-  drawMap(gMapChip);
+  drawObjectMap(gMapChip);
 	gMario.draw(g_Ctx,gMarioTex);
   gKuribo.draw(g_Ctx,gKuriboTex,gMario.mapScrollX);
 
   drawCoin(630,10,gMario.coinNum);
+  changeMapAnim();
 }
 
 /**
@@ -222,6 +228,30 @@ function drawMap(map){
     for(var x = gMario.minDrawMapX;x < gMario.maxDrawMapX;++x){
       if(map[y][x] != NOT_DRAW_MAP){
         var indexX = 32 * ((map[y][x] + 16) % 16);
+        var indexY = 32 * Math.floor(map[y][x] / 16);
+        g_Ctx.drawImage(gMapTex,indexX,indexY,32,32,x * 32 - gMario.mapScrollX,y * 32,32,32);
+      }
+    }
+  }
+}
+
+/**
+  マップチップオブジェクトを描画
+  マップオブジェクトの一部はアニメーションする
+
+  map:対象のマップチップ配列
+*/
+function drawObjectMap(map){
+  // y軸
+  for(var y = 0;y < MAX_MAP_Y;++y){
+    // x軸
+    for(var x = gMario.minDrawMapX;x < gMario.maxDrawMapX;++x){
+      if(map[y][x] != NOT_DRAW_MAP){
+        var indexX = 32 * ((map[y][x] + 16) % 16);
+        // アニメーション用のマップチップの場合、animation offsetを足す
+        if(isAnimationMap(map[y][x])){
+          indexX += gMapAnimOffsetX * MAP_SIZE;
+        }
         var indexY = 32 * Math.floor(map[y][x] / 16);
         g_Ctx.drawImage(gMapTex,indexX,indexY,32,32,x * 32 - gMario.mapScrollX,y * 32,32,32);
       }
@@ -245,6 +275,32 @@ function drawCoin(posX,posY,coinNum){
     maxNumber = Math.floor(maxNumber / 10);		// 111 = 11にする
     numberPosX += 25;
   }
+}
+
+/**
+  マップチップ用のAnimationFrameの処理
+*/
+function changeMapAnim(){
+  if(gMapAnimFrame++ >= MAX_MAP_ANIM_FRAME){
+    gMapAnimFrame = 0;
+    if(++gMapAnimOffsetX >= MAX_MAP_ANIM_NUM){
+      gMapAnimOffsetX = 0;
+    }
+  }
+}
+
+/**
+  アニメーションマップチップかどうか判定する
+
+  mapIndex : 対象のマップチップインデックス
+*/
+function isAnimationMap(mapIndex){
+  for(var i = 0;i < ANIM_MAP_CHIPS.length;++i){
+    if(ANIM_MAP_CHIPS[i] == mapIndex){
+      return true;
+    }
+  }
+  return false;
 }
 
 function move(){

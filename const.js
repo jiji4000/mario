@@ -28,3 +28,8 @@ var DEAD_ANIM_FRAME = 180;
 var STEP_UP_NUM = 13;
 // chapter29
 var NOT_DRAW_MAP = 255;
+// chapter32
+// マップチップのアニメーション数
+var MAX_MAP_ANIM_NUM = 4;
+// マップチップ切り替え数
+var MAX_MAP_ANIM_FRAME = 10;
