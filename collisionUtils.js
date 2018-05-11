@@ -28,3 +28,22 @@ function isCoinMap(mapNumber){
 function replaceEmptyMap(map,mapX,mapY){
   map[mapY][mapX] = NOT_DRAW_MAP;
 }
+
+/**
+  coinブロックかどうか判定する
+
+  mapNumber : マップチップ番号
+*/
+function isCoinBlock(mapNumber){
+  if(mapNumber == 80){
+    return true;
+  }
+  return false;
+}
+
+/**
+  対象のマップチップを空のボックスに入れ替える
+*/
+function replaceEmptyBoxMap(map,mapX,mapY){
+  map[mapY][mapX] = EMPTY_BOX_MAP;
+}

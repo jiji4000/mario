@@ -36,6 +36,11 @@ function Mario(posX,posY){
   // chapter30
   this.coinNum = 0;
   this.playerNum = 3;
+  // chapter32
+  this.isBlockCoinAnim = [false,false];
+  this.blockCoinFrame = [0,0];
+  this.blockCoinX = [0,0];
+  this.blockCoinY = [0,0];
 }
 
 /*
@@ -207,17 +212,34 @@ Mario.prototype.collisionX = function(map,posX){
 */
 Mario.prototype.collisionY = function(map,posY){
 	this.updateMapPositionY(posY);
-	// マリオの上側に当たった場合
-	if(isObjectMap(map[this.upMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.leftMapX])){
-		// (加算される前の)中心点からの距離をみる
-		var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
-		// Yの加算量調整
-		this.addPosY = Math.abs(MAP_SIZE - vecY);
-		// 落下させる
-		this.jumpPower = 0;
-	}
+  // マップ座標xを配列で保管する
+  var mapsX = [this.rightMapX,this.leftMapX];
+  for(var i = 0;i < 2;++i){
+  	// マリオの上側に当たった場合
+  	if(isObjectMap(map[this.upMapY][mapsX[i]])){
+      // コインブロックだった場合
+      if(isCoinBlock(map[this.upMapY][mapsX[i]])){
+        // コインブロック用のアニメーションをセットする
+        var coinX = mapsX[i] * MAP_SIZE;
+        // 一つ上にセットする
+        var coinY = (this.upMapY - 1) * MAP_SIZE;
+        this.setBlockCoinMapAnim(i,coinX,coinY);
+        // ボックスを空にする
+        replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+        // coinの取得
+        this.getCoin();
+      }
+
+      // (加算される前の)中心点からの距離をみる
+      var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
+      // Yの加算量調整
+      this.addPosY = Math.abs(MAP_SIZE - vecY);
+      // 落下させる
+      this.jumpPower = 0;
+  	}
+  }
 	// マリオの下側
-	else if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){
+	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){
 		// (加算される前の)中心点からの距離を見る
 		var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
 		// Yの加算量調整
@@ -246,6 +268,32 @@ Mario.prototype.collisionWithMapItem = function(map){
         replaceEmptyMap(map,mapsX[x],mapsY[y]);
         // コインを取得した時の処理
         this.getCoin();
+      }
+    }
+  }
+}
+
+/**
+  ブロックコインのアニメーション処理のセット
+  index : coinblockの配列index
+*/
+Mario.prototype.setBlockCoinMapAnim = function(index,posX,posY){
+  this.isBlockCoinAnim[index] = true;
+  this.blockCoinFrame[index] = 0;
+  this.blockCoinX[index] = posX;
+  this.blockCoinY[index] = posY;
+}
+
+/**
+  ブロックコインのアニメーション処理
+*/
+Mario.prototype.animateBlockCoin = function(){
+  for(var i = 0;i < MAX_MAP_BLOCK;++i){
+    if(this.isBlockCoinAnim[i]){
+      // コインを上昇させる
+      this.blockCoinY[i] -= 1;
+      if(this.blockCoinFrame[i]++ >= MAX_BLOCK_COIN_FRAME){
+        this.isBlockCoinAnim[i] = false;
       }
     }
   }
