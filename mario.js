@@ -36,7 +36,7 @@ function Mario(posX,posY){
   // chapter30
   this.coinNum = 0;
   this.playerNum = 3;
-  // chapter32
+  // chapter33
   this.isBlockCoinAnim = [false,false];
   this.blockCoinFrame = [0,0];
   this.blockCoinX = [0,0];
