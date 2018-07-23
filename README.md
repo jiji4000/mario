@@ -1,6 +1,6 @@
 # mario
-create super mario html5 canvas and javascript
+create like super mario html5 canvas and javascript no library.
 
-open index.html file by brower
+can play game open index.html file by any browser
 
 ![Alt text](https://github.com/jiji4000/mario/blob/master/mario.gif)
