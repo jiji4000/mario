@@ -47,3 +47,15 @@ function isCoinBlock(mapNumber){
 function replaceEmptyBoxMap(map,mapX,mapY){
   map[mapY][mapX] = EMPTY_BOX_MAP;
 }
+
+/**
+  kinokoブロックかどうか判定する
+
+  mapNumber : マップチップ番号
+*/
+function isKinokoBlock(mapNumber){
+  if(mapNumber == 82){
+    return true;
+  }
+  return false;
+}

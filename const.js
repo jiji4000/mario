@@ -19,6 +19,8 @@ var DRAW_MAX_MAP_X = MAX_MAP_X + 1;
 // chapter23
 // 最大のマップチップ量X
 var MAX_MAP_CHIP_X = 100;
+// chapter34
+var INACTIVE = -1;
 // chapter27
 var NORMAL_STATE = 1;
 var DEAD_ACTION = 100;

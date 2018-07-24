@@ -41,6 +41,8 @@ function Mario(posX,posY){
   this.blockCoinFrame = [0,0];
   this.blockCoinX = [0,0];
   this.blockCoinY = [0,0];
+  // chapter34
+  this.kinoko = new Kinoko(0,0,LEFT_DIR);
 }
 
 /*
@@ -230,6 +232,17 @@ Mario.prototype.collisionY = function(map,posY){
         this.getCoin();
       }
 
+      // キノコブロックだった場合(chapter34)
+      if(isKinokoBlock(map[this.upMapY][mapsX[i]])){
+        // キノコを出現させる
+        var kinokoX = mapsX[i] * MAP_SIZE;
+        // 一つ上にセットする
+        var kinokoY = (this.upMapY - 1) * MAP_SIZE;
+        this.kinoko.activate(kinokoX,kinokoY,LEFT_DIR);
+        // ボックスを空にする
+        replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+      }
+
       // (加算される前の)中心点からの距離をみる
       var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
       // Yの加算量調整
@@ -415,4 +428,7 @@ Mario.prototype.update = function(mapChip){
 	}
 	// 死亡後処理
 	this.deadAction();
+
+  // キノコ
+  this.kinoko.update(mapChip,this);
 }
