@@ -160,20 +160,20 @@ Kinoko.prototype.collisionY = function(map,posY){
   mario:Marioクラス
 */
 Kinoko.prototype.collisionWithMario = function(map,mario){
-	if(!mario.isDead()){
-		// x軸
-		if(mario.moveNumX < this.posX + 32 && mario.moveNumX + 32 > this.posX)
-		{
-			// マリオの上とキノコの下(キノコは32*32で切り取られているので、最下部は32+される)
-			if(mario.posY < this.posY + 32){
-				// マリオの下とキノコの上
-				if(mario.posY + mario.height > this.posY + (32 - this.height)){
-           // マリオを大きくする処理を書く
-           this.state = INACTIVE;
-				}
-			}
-		}
-	}
+  if(!mario.isDead()){
+    // x軸
+    if(mario.moveNumX < this.posX + 32 && mario.moveNumX + 32 > this.posX)
+    {
+      // マリオの上とキノコの下(キノコは32*32で切り取られているので、最下部は32+される)
+      if(mario.posY < this.posY + 32){
+        // マリオの下とキノコの上
+        if(mario.posY + mario.height > this.posY + (32 - this.height)){
+          // マリオを大きくする処理を書く
+          this.state = INACTIVE;
+        }
+      }
+    }
+  }
 }
 
 /*

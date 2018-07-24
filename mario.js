@@ -428,7 +428,4 @@ Mario.prototype.update = function(mapChip){
 	}
 	// 死亡後処理
 	this.deadAction();
-
-  // キノコ
-  this.kinoko.update(mapChip,this);
 }

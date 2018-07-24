@@ -321,6 +321,7 @@ function move(){
   gMario.update(gMapChip);
 
   enemyMove();
+  gMario.kinoko.update(gMapChip,gMario);
 }
 
 function enemyMove(){
