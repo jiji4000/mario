@@ -51,7 +51,12 @@ function Mario(posX,posY){
 	texture:img class
 */
 Mario.prototype.draw = function(ctx,texture){
-	ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + ((this.state - 1) * this.height),32,this.height,this.posX,this.posY,32,this.height);
+	if(!this.isDead()) {
+		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + ((this.state - 1) * this.height),32,this.height,this.posX,this.posY,32,this.height);
+	}
+	else {
+		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,this.direction * this.height,32,this.height,this.posX,this.posY,32,this.height);
+	}
 }
 
 Mario.prototype.moveX = function(mapChip,moveX){
