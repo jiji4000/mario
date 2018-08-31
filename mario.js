@@ -51,7 +51,7 @@ function Mario(posX,posY){
 	texture:img class
 */
 Mario.prototype.draw = function(ctx,texture){
-	ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,this.direction * 32,32,32,this.posX,this.posY,32,32);
+	ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + ((this.state - 1) * this.height),32,this.height,this.posX,this.posY,32,this.height);
 }
 
 Mario.prototype.moveX = function(mapChip,moveX){
@@ -382,6 +382,15 @@ Mario.prototype.isDead = function(){
 		return true;
 	}
 	return false;
+}
+
+/**
+ * マリオがキノコを取得した時の処理
+ */
+Mario.prototype.getKinoko = function(){
+	this.state = KINOKO_STATE;
+	this.height = 64;
+	this.posY -= 32;
 }
 
 /**

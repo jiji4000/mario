@@ -170,6 +170,8 @@ Kinoko.prototype.collisionWithMario = function(map,mario){
         if(mario.posY + mario.height > this.posY + (32 - this.height)){
           // マリオを大きくする処理を書く
           this.state = INACTIVE;
+          // マリオを大きくする処理
+          mario.getKinoko();
         }
       }
     }

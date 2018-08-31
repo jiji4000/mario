@@ -23,6 +23,7 @@ var MAX_MAP_CHIP_X = 100;
 var INACTIVE = -1;
 // chapter27
 var NORMAL_STATE = 1;
+var KINOKO_STATE = 2;
 var DEAD_ACTION = 100;
 var DEAD = 101;
 // chapter28
