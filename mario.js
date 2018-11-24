@@ -24,6 +24,8 @@ function Mario(posX,posY){
 	this.leftMapX = 0;
 	this.upMapY = 0;
 	this.downMapY = 0;
+	// chapter26
+	this.centerMapY = 0;
 	// chapter22スクロール処理
 	this.maxDrawMapX = DRAW_MAX_MAP_X;			// 最大の描画範囲X
 	this.minDrawMapX = 0;		// 最小の描画範囲X
@@ -160,9 +162,22 @@ Mario.prototype.updateMapPositionX = function(posX){
 	Y軸方向のマップチップの更新
 */
 Mario.prototype.updateMapPositionY = function(posY){
-	// y
-	this.upMapY = Math.floor(posY / MAP_SIZE);
-	this.downMapY = Math.floor((posY + MAP_SIZE - 1) / MAP_SIZE);
+	// キノコ状態の時と分ける
+	if(this.state == KINOKO_STATE){
+		// キノコ状態の時のマップチップ座標
+		this.upMapY = Math.floor(posY / MAP_SIZE);
+		// 通常よりもマップチップ一つ分多い
+		this.downMapY = Math.floor((posY + this.height - 1) / MAP_SIZE);
+		// 中央座標
+		this.centerMapY = Math.floor((posY + MAP_SIZE - 1) / MAP_SIZE);
+	}
+	else{
+		// 小さい状態
+		this.upMapY = Math.floor(posY / MAP_SIZE);
+		this.downMapY = Math.floor((posY + MAP_SIZE - 1) / MAP_SIZE);
+		// 中央座標
+		this.centerMapY = Math.floor((posY + (MAP_SIZE / 2) - 1) / MAP_SIZE);
+	}
 
 	// 配列外チェック
 	if(this.upMapY >= MAX_MAP_Y - 1){
@@ -176,6 +191,13 @@ Mario.prototype.updateMapPositionY = function(posY){
 	}
 	if(this.downMapY < 0){
 		this.downMapY = 0;
+	}
+	// 中央座標の配列外チェック
+	if(this.centerMapY >= MAX_MAP_Y - 1){
+		this.centerMapY = MAX_MAP_Y - 1;
+	}
+	if(this.centerMapY < 0){
+		this.centerMapY = 0;
 	}
 }
 
@@ -200,13 +222,13 @@ Mario.prototype.updateMapPosition = function(){
 Mario.prototype.collisionX = function(map,posX){
 	this.updateMapPositionX(posX);
 	// マリオの右側
-	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.rightMapX])){
+	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.rightMapX]) || isObjectMap(map[this.centerMapY][this.rightMapX])){
 		// (加算される前の)中心点からの距離を取る
 		var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.rightMapX * MAP_SIZE) + HALF_MAP_SIZE));
 		this.addPosX = Math.abs(MAP_SIZE - vecX);
 	}
 	// マリオの左側
-	else if(isObjectMap(map[this.downMapY][this.leftMapX]) || isObjectMap(map[this.upMapY][this.leftMapX])){
+	else if(isObjectMap(map[this.downMapY][this.leftMapX]) || isObjectMap(map[this.upMapY][this.leftMapX]) || isObjectMap(map[this.centerMapY][this.leftMapX])){
 		// (加算される前の)中心点からの距離を取る
 		var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.leftMapX * MAP_SIZE) + HALF_MAP_SIZE));
 		this.addPosX = -Math.abs(MAP_SIZE - vecX);
@@ -259,7 +281,8 @@ Mario.prototype.collisionY = function(map,posY){
 	// マリオの下側
 	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){
 		// (加算される前の)中心点からの距離を見る
-		var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
+		var centerY = this.height == 64 ? this.posY + 32 : this.posY;
+		var vecY = Math.abs((centerY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
 		// Yの加算量調整
 		this.addPosY = Math.abs(MAP_SIZE - vecY);
 		// 地面についた
