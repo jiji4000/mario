@@ -49,6 +49,13 @@ function replaceEmptyBoxMap(map,mapX,mapY){
 }
 
 /**
+	対象のマップチップを空のにする
+*/
+function replaceEmptyMap(map,mapX,mapY){
+	map[mapY][mapX] = NOT_DRAW_MAP;
+}
+
+/**
   kinokoブロックかどうか判定する
 
   mapNumber : マップチップ番号
@@ -58,4 +65,17 @@ function isKinokoBlock(mapNumber){
     return true;
   }
   return false;
+}
+
+/**
+	chapter37
+	ブロックマップチップかどうか判定する
+	
+	mapNumber : マップチップ番号
+*/
+function isBlockMap(mapNumber){
+	if(mapNumber == 64){
+		return true;
+	}
+	return false;
 }

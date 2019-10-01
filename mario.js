@@ -45,6 +45,18 @@ function Mario(posX,posY){
   this.blockCoinY = [0,0];
   // chapter34
   this.kinoko = new Kinoko(0,0,LEFT_DIR);
+  // chapter37
+  this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Blockの座標X
+  this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Blockの座標Y
+  this.blockAttackCnt = [0,0];	
+  this.blockAttackIndex = 0;
+  this.isBlockUp = [false,false];		// ブロック上昇フラグ
+  this.isBlockAttack = [false,false];	// 破壊フラグ
+  this.blockAttackAddY = [0,0];		// 蜿ｩ縺�◆繝悶Ο繝�け荳頑�蛟､
+  this.blockUpX = [0,0];		// 上昇ブロック用座標X
+  this.blockUpY = [0,0];		// 上昇ブロック用座標Y
+  this.blockAttackIndexX = [0,0];	// ブロックを移動させる対象のブロックマップチップ番号X
+  this.blockAttackIndexY = [0,0];	// ブロックを移動させる対象のブロックマップチップ番号Y
 }
 
 /*
@@ -129,7 +141,7 @@ Mario.prototype.jumpAction = function(isPush,mapChip){
 			this.jumpPower -= GRAVITY_POWER;
 		}
 	}
-	console.log("jumpPower = " + this.jumpPower);
+	//console.log("jumpPower = " + this.jumpPower);
 }
 
 /**
@@ -209,10 +221,10 @@ Mario.prototype.updateMapPosition = function(){
 	this.updateMapPositionX(this.moveNumX);
 	this.updateMapPositionY(this.posY);
 	// log
-	console.log("rightMapX = " + this.rightMapX + ", leftMapX = " + this.leftMapX + ",upMapY = " + this.upMapY + ",this.downMapY = "
-		+ this.downMapY);
+//	console.log("rightMapX = " + this.rightMapX + ", leftMapX = " + this.leftMapX + ",upMapY = " + this.upMapY + ",this.downMapY = "
+//		+ this.downMapY);
 
-	console.log("mario posX = " + this.posX + ",mario posY = " + this.posY);
+	//console.log("mario posX = " + this.posX + ",mario posY = " + this.posY);
 }
 
 /**
@@ -268,6 +280,13 @@ Mario.prototype.collisionY = function(map,posY){
         this.kinoko.activate(kinokoX,kinokoY,LEFT_DIR);
         // ボックスを空にする
         replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+      }
+      
+      // ブロックのアニメーション
+      if(isBlockMap(map[this.upMapY][mapsX[i]])){
+    	  var posX = mapsX[i] * MAP_SIZE;
+    	  var posY = this.upMapY * MAP_SIZE;
+    	  this.blockAction(mapsX[i],this.upMapY,false,map);
       }
 
       // (加算される前の)中心点からの距離をみる
@@ -458,11 +477,111 @@ Mario.prototype.update = function(mapChip){
 	  }
 	  // ジャンプ処理
 	  this.jumpAction(gUpPush,mapChip);
-    // マップチップアイテムオブジェクトとの当たり判定
-    this.collisionWithMapItem(mapChip);
+	  // マップチップアイテムオブジェクトとの当たり判定
+	  this.collisionWithMapItem(mapChip);
 	  // scroll処理
 	  this.doMapScrollX();
 	}
 	// 死亡後処理
 	this.deadAction();
+}
+
+/**
+ * chapter37
+ * ブロックの上昇処理か破壊処理のアニメーション設定を仕込む
+ * 
+ * mapIndexX : map index x座標
+ * mapIndexY : map index y座標
+ * map:マップチップ配列
+ * isUp:破壊できないマップの場合は上昇させる
+ */
+Mario.prototype.blockAction = function(mapIndexX,mapIndexY,isUp,map){
+	// 対象のマップチップ座標を代入
+	this.blockAttackIndexX[this.blockAttackIndex] = mapIndexX;
+	this.blockAttackIndexY[this.blockAttackIndex] = mapIndexY;
+	// 小さいかつ上昇フラグが立っている場合は破壊できないので、上昇させる
+	if(this.state == NORMAL_STATE || isUp)
+	{
+		this.isBlockUp[this.blockAttackIndex] = true;	// 上昇フラグon
+		this.blockUpX[this.blockAttackIndex] = mapIndexX * MAP_SIZE;
+		this.blockUpY[this.blockAttackIndex] = mapIndexY * MAP_SIZE;
+		this.blockAttackAddY[this.blockAttackIndex] = 8;
+	}
+	// 大きい場合は破壊可能
+	else if(this.state == KINOKO_STATE){
+		// 空マップにする
+		replaceEmptyMap(map,mapIndexX,mapIndexY);
+		// アニメーションを仕込む
+		this.isBlockAttack[this.blockAttackIndex] = true;				// block attack flag
+		// 右と左で分けているんだ
+		this.blockAttackX[this.blockAttackIndex][0] = this.blockAttackX[this.blockAttackIndex][1] = mapIndexX * MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮX蠎ｧ讓�(0,1縺ｯ竊仙�)
+		this.blockAttackX[this.blockAttackIndex][2] = this.blockAttackX[this.blockAttackIndex][3] = mapIndexX * MAP_SIZE + HALF_MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮX蠎ｧ讓�(2,3縺ｯ竊貞�)
+		this.blockAttackY[this.blockAttackIndex][0] = this.blockAttackY[this.blockAttackIndex][2] = mapIndexY * MAP_SIZE + HALF_MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮY蠎ｧ讓�(0,2縺ｯ竊灘�)
+		this.blockAttackY[this.blockAttackIndex][1] = this.blockAttackY[this.blockAttackIndex][3] = mapIndexY * MAP_SIZE - HALF_MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮY蠎ｧ讓�(1,3縺ｯ竊大�)				
+		this.blockAttackAddY[this.blockAttackIndex] = 10;
+	}
+	// animationフラグとして利用
+	this.blockAttackCnt[this.blockAttackIndex]++;
+	// 対象のブロック
+	if(++this.blockAttackIndex >= MAX_MAP_BLOCK)this.blockAttackIndex = 0;
+}
+
+/**
+ * chapter37
+ * ブロックのアニメーション処理
+ */
+Mario.prototype.animateBlock = function(map){
+	// animationさせてるわ
+	// ブロックの数分
+	for(var i = 0;i < MAX_MAP_BLOCK;++i){
+		// ブロック破壊フラグ
+		if(this.isBlockAttack[i]){
+			// キノコが上にあった場合キノコを上昇させる
+			if(this.kinoko.state == NORMAL_STATE){
+				for(var i = 0;i < MAX_MAP_BLOCK;++i){
+					// Y座標チェック
+					if(this.blockAttackY[i][0] == this.kinoko.posY + 32){
+						// x座標チェック
+						if(this.blockAttackX[i][0] < this.kinoko.posX + 30  && this.blockAtackX[i][0] + 30 > this.kinoko.posX){
+							this.kinoko.addPosY = -10;
+						}
+					}
+				}
+			}
+			
+			// 上昇させる
+			for(var j = 0;j < 4;++j){
+				this.blockAttackY[i][j] -= this.blockAttackAddY[i];
+			}
+			this.blockAttackAddY[i] -= 1;
+			// 4つのブロックのアニメーション
+			this.blockAttackX[i][0] -= 4;
+			this.blockAttackX[i][1] = this.blockAttackX[i][0];
+			this.blockAttackX[i][2] += 4;
+			this.blockAttackX[i][3] = this.blockAttackX[i][2];
+			// ブロックが画面外に出たらアニメーションを停止する
+			if(this.blockAttackY[i][3] <= -32){
+				this.isBlockAttack[i] = false;
+			}
+		}
+		// ブロック上昇処理
+		else if(this.isBlockUp[i]){
+			// キノコが上にあった場合キノコを上昇させる
+			if(this.kinoko.state == NORMAL_STATE){				
+				// Y座標チェック
+				if(this.blockUpY[i] == this.kinoko.posY + 32){
+					// x座標チェック
+					if(this.blockUpX[i] < this.kinoko.posX + 32  && this.blockUpX[i] + 32 > this.kinoko.posX){
+						this.kinoko.addPosY = -10;
+					}
+				}
+			}		
+			// BlockAttackで代用している分けた方がいいかもしれん
+			this.blockAttackAddY[i] -= 1;
+			// 上下運動が終わった場合
+			if(this.blockAttackAddY[i] == 0){
+				this.isBlockUp[i] = false;
+			}
+		}
+	}
 }
