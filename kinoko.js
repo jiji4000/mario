@@ -11,6 +11,10 @@ function Kinoko(posX,posY,dir){
 	this.downMapY = 0;
 	this.height = 32;
 	this.state = INACTIVE;
+	// chapter37
+	// ブロックからの出現アニメーションフラグ
+	this.isFirstAnimation = true;
+	this.offsetY = 0;
 }
 
 /*
@@ -21,7 +25,7 @@ function Kinoko(posX,posY,dir){
 */
 Kinoko.prototype.draw = function(ctx,texture,scrollX){
 	if(this.state != INACTIVE){
-		ctx.drawImage(texture, 0,480,32,32,this.posX - scrollX,this.posY,32,32);
+		ctx.drawImage(texture, 0,480,32,this.offsetY,this.posX - scrollX,this.posY,32,this.offsetY);
 	}
 }
 
@@ -184,9 +188,15 @@ Kinoko.prototype.collisionWithMario = function(map,mario){
 */
 Kinoko.prototype.update = function(map,mario){
 	if(this.state != INACTIVE){
-		this.move(map,2);
+		// chapter37初回出現アニメーション
+		if(this.isFirstAnimation){
+			this.appearingAnimation();
+		}
+		else{
+			this.move(map,2);
+			this.gravityAction(map);
+		}
 		this.collisionWithMario(map,mario);
-		this.gravityAction(map);
 	}
 }
 
@@ -201,4 +211,16 @@ Kinoko.prototype.activate = function(posX,posY,dir){
   this.posY = posY;
   this.state = NORMAL_STATE;
   this.dir = dir;
+}
+
+/**
+ * きのこの出現時のアニメーションを行う
+ * 
+*/
+Kinoko.prototype.appearingAnimation = function(){
+	this.posY -= 1;
+	this.offsetY += 1;
+	if(this.offsetY == 32){
+		this.isFirstAnimation = false;
+	} 
 }
