@@ -224,3 +224,23 @@ Kinoko.prototype.appearingAnimation = function(){
 		this.isFirstAnimation = false;
 	} 
 }
+
+/**
+ * chapter37
+ * ブロックの上にのっていた時にきのこを上昇させる処理 
+ * 
+ * blockPosX : ブロックのX座標
+ * blockPosY : ブロックのY座標
+*/
+Kinoko.prototype.blockUpAction = function(blockPosX,blockPosY){
+	// キノコが上にあった場合キノコを上昇させる
+	if(this.state == NORMAL_STATE){				
+		// Y座標チェック
+		if(blockPosY == this.posY + MAP_SIZE){
+			// x座標チェック
+			if(blockPosX < this.posX + MAP_SIZE  && blockPosX + MAP_SIZE > this.posX){
+				this.addPosY = -10;
+			}
+		}
+	}		
+}

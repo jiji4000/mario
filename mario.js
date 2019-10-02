@@ -566,16 +566,9 @@ Mario.prototype.animateBlock = function(map){
 		}
 		// ブロック上昇処理
 		else if(this.isBlockUp[i]){
-			// キノコが上にあった場合キノコを上昇させる
-			if(this.kinoko.state == NORMAL_STATE){				
-				// Y座標チェック
-				if(this.blockUpY[i] == this.kinoko.posY + 32){
-					// x座標チェック
-					if(this.blockUpX[i] < this.kinoko.posX + 32  && this.blockUpX[i] + 32 > this.kinoko.posX){
-						this.kinoko.addPosY = -10;
-					}
-				}
-			}		
+			// きのこの上昇処理
+			this.kinoko.blockUpAction(this.blockUpX[i],this.blockUpY[i]);
+			
 			// BlockAttackで代用している分けた方がいいかもしれん
 			this.blockAttackAddY[i] -= 1;
 			// 上下運動が終わった場合
