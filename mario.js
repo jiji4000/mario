@@ -275,8 +275,8 @@ Mario.prototype.collisionY = function(map,posY){
       if(isKinokoBlock(map[this.upMapY][mapsX[i]])){
         // キノコを出現させる
         var kinokoX = mapsX[i] * MAP_SIZE;
-        // 一つ上にセットする
-        var kinokoY = (this.upMapY - 1) * MAP_SIZE;
+        // boxから出現させるようにする
+        var kinokoY = this.upMapY * MAP_SIZE;
         this.kinoko.activate(kinokoX,kinokoY,LEFT_DIR);
         // ボックスを空にする
         replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
