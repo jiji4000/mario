@@ -443,7 +443,7 @@ Mario.prototype.getKinoko = function(){
 /**
 	マリオの更新関数
 */
-Mario.prototype.update = function(mapChip){
+Mario.prototype.update = function(mapChip,kuribos){
 	if(!this.isDead()){
 	  // マップ座標の更新
 	  this.updateMapPosition();
@@ -480,7 +480,7 @@ Mario.prototype.update = function(mapChip){
 	  // マップチップアイテムオブジェクトとの当たり判定
 	  this.collisionWithMapItem(mapChip);
 	  // blockが動いたことによる当たり判定
-	  this.blockCollisionAction();	  
+	  this.blockCollisionAction(kuribos);
 	  // scroll処理
 	  this.doMapScrollX();
 	}
@@ -569,17 +569,29 @@ Mario.prototype.animateBlock = function(map){
  * blockが移動したときのcollision eventを発生させる
  * collisionのところで呼ぶ
 */
-Mario.prototype.blockCollisionAction = function(){
+Mario.prototype.blockCollisionAction = function(kuribos){
 	for(var i = 0;i < MAX_MAP_BLOCK;++i){
 		// ブロック破壊フラグ
 		if(this.isBlockAttack[i]){
 			// きのこの上昇処理(ずらした分を考慮)
 			this.kinoko.blockUpAction(this.blockAttackX[i][0],this.blockAttackY[i][0] - HALF_MAP_SIZE);
+			// クリボの当たり判定
+			if(kuribos != null){
+				for(var j = 0;j < kuribos.length;++j){
+					kuribos[j].blockUpAction(this.blockAttackX[i][0],this.blockAttackY[i][0] - HALF_MAP_SIZE);
+				}
+			}			
 		}
 		// ブロック上昇処理
 		else if(this.isBlockUp[i]){
 			// きのこの上昇処理
 			this.kinoko.blockUpAction(this.blockUpX[i],this.blockUpY[i]);
+			// クリボ
+			if(kuribos != null){
+				for(var j = 0;j < kuribos.length;++j){
+					kuribos[j].blockUpAction(this.blockUpX[i],this.blockUpY[i]);
+				}
+			}
 		}
 	}
 }
