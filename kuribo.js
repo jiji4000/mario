@@ -3,6 +3,8 @@ function Kuribo(posX,posY,dir){
 	this.posY = posY;
 	// chapter25敵の移動
 	this.addPosX = 0;
+	// chapter37
+	this.addPosY = 0;
 	// どのタイミングでアニメーションを切り替えるか
 	this.animCnt = 0;
 	// 切り出す始点のX座標
@@ -178,6 +180,8 @@ Kuribo.prototype.collisionWithMario = function(map,mario){
 Kuribo.prototype.update = function(map,mario,moveNum){
 	if(!this.isDead()){
 		this.move(map,moveNum);
+		// chapter37
+		this.gravityAction(map);
 		this.collisionWithMario(map,mario);
 	}
 	this.deadAction();
@@ -205,4 +209,59 @@ Kuribo.prototype.isDead = function(){
 		return true;
 	}
 	return false;
+}
+
+/**
+ * chapter37
+ * ブロックの上にのっていた時に上昇させる処理 
+ * 
+ * blockPosX : ブロックのX座標
+ * blockPosY : ブロックのY座標
+*/
+Kuribo.prototype.blockUpAction = function(blockPosX,blockPosY){
+	// クリボが上にいた場合クリボを上昇させる
+	if(this.state == NORMAL_STATE){				
+		// Y座標チェック
+		if(blockPosY == this.posY + MAP_SIZE){
+			// x座標チェック
+			if(blockPosX < this.posX + MAP_SIZE  && blockPosX + MAP_SIZE > this.posX){
+				this.addPosY = -10;
+			}
+		}
+	}		
+}
+
+/**
+ * chapter37
+ * 重力動作
+ * mapChip :対象のマップチップ配列
+*/
+Kuribo.prototype.gravityAction = function(mapChip){
+	// 重力を加算
+	this.addPosY += GRAVITY_POWER;
+	// 落下量調整
+	if(this.addPosY >= MAX_GRAVITY){
+	  this.addPosY = MAX_GRAVITY;
+	}
+	// Y軸方向の当たり判定(地面に接触している場合は、addPosYは0になる)
+	this.collisionY(mapChip,this.posY + this.addPosY);
+	this.posY += this.addPosY;
+}
+
+/**
+ * chapter37
+ * クリボ上下の当たり判定
+*/
+Kuribo.prototype.collisionY = function(map,posY){
+	this.updateMapPositionY(posY);
+	// キャラの下側と接触した場合
+	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){
+		// (加算される前の)中心点からの距離を見る
+		var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
+		// Yの加算量調整
+		this.addPosY = Math.abs(MAP_SIZE - vecY);
+		// 地面についた
+		this.posY += this.addPosY;
+		this.addPosY = 0;
+	}
 }
