@@ -47,8 +47,9 @@ Kuribo.prototype.move = function(mapChip,moveNum){
 	this.addPosX = moveNum;
 	// マップチップとの当たり判定
 	this.collisionX(mapChip,this.posX + this.addPosX);
-
 	this.posX += this.addPosX;
+	// 移動したのでマップ座標更新
+	this.updateMapPositionX(this.posX);
 
 	// animation
 	if(this.animCnt++ >= 12){
