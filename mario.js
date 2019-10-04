@@ -46,17 +46,17 @@ function Mario(posX,posY){
   // chapter34
   this.kinoko = new Kinoko(0,0,LEFT_DIR);
   // chapter37
-  this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Blockの座標X
-  this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Blockの座標Y
-  this.blockAttackCnt = [0,0];	
-  this.blockAttackIndex = 0;
+  this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標X
+  this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標Y
+  this.blockAttackCnt = [0,0];			// animation cnt
+  this.blockAttackIndex = 0;			// blockのindex
   this.isBlockUp = [false,false];		// ブロック上昇フラグ
   this.isBlockAttack = [false,false];	// 破壊フラグ
-  this.blockAttackAddY = [0,0];		// 蜿ｩ縺�◆繝悶Ο繝�け荳頑�蛟､
-  this.blockUpX = [0,0];		// 上昇ブロック用座標X
-  this.blockUpY = [0,0];		// 上昇ブロック用座標Y
-  this.blockAttackIndexX = [0,0];	// ブロックを移動させる対象のブロックマップチップ番号X
-  this.blockAttackIndexY = [0,0];	// ブロックを移動させる対象のブロックマップチップ番号Y
+  this.blockAttackAddY = [0,0];			// ブロックの移動量Y
+  this.blockUpX = [0,0];				// 上昇ブロック用座標X
+  this.blockUpY = [0,0];				// 上昇ブロック用座標Y
+  this.blockAttackIndexX = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号X
+  this.blockAttackIndexY = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号Y
 }
 
 /*
@@ -554,7 +554,6 @@ Mario.prototype.animateBlock = function(map){
 		}
 		// ブロック上昇処理
 		else if(this.isBlockUp[i]){			
-			// BlockAttackで代用している分けた方がいいかもしれん
 			this.blockAttackAddY[i] -= 1;
 			// 上下運動が終わった場合
 			if(this.blockAttackAddY[i] == 0){
