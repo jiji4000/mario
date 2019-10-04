@@ -40,3 +40,5 @@ var MAX_MAP_ANIM_FRAME = 10;
 var MAX_MAP_BLOCK = 2;
 var MAX_BLOCK_COIN_FRAME = 20;
 var EMPTY_BOX_MAP = 81;
+// chapter37
+var BLOCK_UP_ADD_Y = -10;

@@ -242,7 +242,7 @@ Kinoko.prototype.blockUpAction = function(blockPosX,blockPosY){
 		if(blockPosY == this.posY + MAP_SIZE){
 			// x座標チェック
 			if(blockPosX < this.posX + MAP_SIZE  && blockPosX + MAP_SIZE > this.posX){
-				this.addPosY = -10;
+				this.addPosY = BLOCK_UP_ADD_Y;
 			}
 		}
 	}		
