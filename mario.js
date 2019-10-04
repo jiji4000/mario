@@ -516,10 +516,10 @@ Mario.prototype.blockAction = function(mapIndexX,mapIndexY,isUp,map){
 		// アニメーションを仕込む
 		this.isBlockAttack[this.blockAttackIndex] = true;				// block attack flag
 		// 右と左で分けているんだ
-		this.blockAttackX[this.blockAttackIndex][0] = this.blockAttackX[this.blockAttackIndex][1] = mapIndexX * MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮX蠎ｧ讓�(0,1縺ｯ竊仙�)
-		this.blockAttackX[this.blockAttackIndex][2] = this.blockAttackX[this.blockAttackIndex][3] = mapIndexX * MAP_SIZE + HALF_MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮX蠎ｧ讓�(2,3縺ｯ竊貞�)
-		this.blockAttackY[this.blockAttackIndex][0] = this.blockAttackY[this.blockAttackIndex][2] = mapIndexY * MAP_SIZE + HALF_MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮY蠎ｧ讓�(0,2縺ｯ竊灘�)
-		this.blockAttackY[this.blockAttackIndex][1] = this.blockAttackY[this.blockAttackIndex][3] = mapIndexY * MAP_SIZE - HALF_MAP_SIZE;	// 螢翫ｌ縺溘ヶ繝ｭ繝�け縺ｮY蠎ｧ讓�(1,3縺ｯ竊大�)				
+		this.blockAttackX[this.blockAttackIndex][0] = this.blockAttackX[this.blockAttackIndex][1] = mapIndexX * MAP_SIZE;
+		this.blockAttackX[this.blockAttackIndex][2] = this.blockAttackX[this.blockAttackIndex][3] = mapIndexX * MAP_SIZE + HALF_MAP_SIZE;
+		this.blockAttackY[this.blockAttackIndex][0] = this.blockAttackY[this.blockAttackIndex][2] = mapIndexY * MAP_SIZE + HALF_MAP_SIZE;
+		this.blockAttackY[this.blockAttackIndex][1] = this.blockAttackY[this.blockAttackIndex][3] = mapIndexY * MAP_SIZE - HALF_MAP_SIZE;				
 		this.blockAttackAddY[this.blockAttackIndex] = 10;
 	}
 	// animationフラグとして利用
