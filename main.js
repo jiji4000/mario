@@ -312,7 +312,6 @@ function drawBlock(){
 		}
 		// 上昇ブロック
 		if(gMario.isBlockUp[i]){
-			console.log("up");
 			// カモフラージュ用
 			var indexX = 32 * ((gBackGroundMapChip[gMario.blockAttackIndexY[i]][gMario.blockAttackIndexX[i]] + 16) % 16);
 			var indexY = 32 * Math.floor(gBackGroundMapChip[gMario.blockAttackIndexY[i]][gMario.blockAttackIndexX[i]] / 16);
