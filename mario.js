@@ -57,6 +57,9 @@ function Mario(posX,posY){
   this.blockUpY = [0,0];				// 上昇ブロック用座標Y
   this.blockAttackIndexX = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号X
   this.blockAttackIndexY = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号Y
+  // chapter38
+  this.fireKinoko = new FireKinoko(0,0);
+  this.textureOffsetY = 0;
 }
 
 /*
@@ -66,10 +69,10 @@ function Mario(posX,posY){
 */
 Mario.prototype.draw = function(ctx,texture){
 	if(!this.isDead()) {
-		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + ((this.state - 1) * this.height),32,this.height,this.posX,this.posY,32,this.height);
+		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + this.textureOffsetY,32,this.height,this.posX,this.posY,32,this.height);
 	}
 	else {
-		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,this.direction * this.height,32,this.height,this.posX,this.posY,32,this.height);
+		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,this.direction * this.height + this.textureOffsetY,32,this.height,this.posX,this.posY,32,this.height);
 	}
 }
 
@@ -175,7 +178,7 @@ Mario.prototype.updateMapPositionX = function(posX){
 */
 Mario.prototype.updateMapPositionY = function(posY){
 	// キノコ状態の時と分ける
-	if(this.state == KINOKO_STATE){
+	if(this.isBig()){
 		// キノコ状態の時のマップチップ座標
 		this.upMapY = Math.floor(posY / MAP_SIZE);
 		// 通常よりもマップチップ一つ分多い
@@ -271,13 +274,23 @@ Mario.prototype.collisionY = function(map,posY){
         this.getCoin();
       }
 
-      // キノコブロックだった場合(chapter34)
+      // キノコブロックだった場合(chapter34&38)
       if(isKinokoBlock(map[this.upMapY][mapsX[i]])){
-        // キノコを出現させる
-        var kinokoX = mapsX[i] * MAP_SIZE;
-        // boxから出現させるようにする
-        var kinokoY = this.upMapY * MAP_SIZE;
-        this.kinoko.activate(kinokoX,kinokoY,LEFT_DIR);
+    	// when mario is big appear fire kinoko
+    	if(this.isBig()){
+    		// chapter38 appear fire kinoko
+	        var fireKinokoX = mapsX[i] * MAP_SIZE;
+	        // appeared from box
+	        var fireKinokoY = this.upMapY * MAP_SIZE;
+	        this.fireKinoko.activate(fireKinokoX,fireKinokoY);    		
+    	}
+    	else{
+	        // appear kinoko
+	        var kinokoX = mapsX[i] * MAP_SIZE;
+	        // boxから出現させるようにする
+	        var kinokoY = this.upMapY * MAP_SIZE;
+	        this.kinoko.activate(kinokoX,kinokoY,LEFT_DIR);		
+    	}
         // ボックスを空にする
         replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
       }
@@ -438,6 +451,15 @@ Mario.prototype.getKinoko = function(){
 	this.state = KINOKO_STATE;
 	this.height = 64;
 	this.posY -= 32;
+	this.textureOffsetY = 64;
+}
+
+/**
+ * get fire kinoko action
+ */
+Mario.prototype.getFireKinoko = function(){
+	this.state = FIRE_STATE;
+	this.textureOffsetY = 192;
 }
 
 /**
@@ -510,7 +532,7 @@ Mario.prototype.blockAction = function(mapIndexX,mapIndexY,isUp,map){
 		this.blockAttackAddY[this.blockAttackIndex] = 8;
 	}
 	// 大きい場合は破壊可能
-	else if(this.state == KINOKO_STATE){
+	else if(this.isBig()){
 		// 空マップにする
 		replaceEmptyMap(map,mapIndexX,mapIndexY);
 		// アニメーションを仕込む
@@ -593,4 +615,16 @@ Mario.prototype.blockCollisionAction = function(kuribos){
 			}
 		}
 	}
+}
+
+/**
+ * judge big size mario
+ * 
+ * return:if big true
+ */
+Mario.prototype.isBig = function(){
+	if(this.state == KINOKO_STATE || this.state == FIRE_STATE){
+		return true;
+	}
+	return false;
 }
