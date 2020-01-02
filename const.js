@@ -21,13 +21,16 @@ var DRAW_MAX_MAP_X = MAX_MAP_X + 1;
 var MAX_MAP_CHIP_X = 100;
 // chapter34
 var INACTIVE = -1;
+// chapter39
+var END_ANIMATION = 4;
 // chapter27
 var NORMAL_STATE = 1;
 var KINOKO_STATE = 2;
 // chapter38
 var FIRE_STATE = 3;
 var DEAD_ACTION = 100;
-var DEAD = 101;
+var DEAD_FIRE_ACTION = 101;
+var DEAD = 102;
 // chapter28
 var DEAD_ANIM_FRAME = 180;
 var STEP_UP_NUM = 13;
@@ -44,3 +47,7 @@ var MAX_BLOCK_COIN_FRAME = 20;
 var EMPTY_BOX_MAP = 81;
 // chapter37
 var BLOCK_UP_ADD_Y = -10;
+// chapter39
+var FIRE_SIZE = 24;
+var DISPLAY_HEIGHT = 480;
+var DISPLAY_WIDTH = 640;

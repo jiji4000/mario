@@ -184,6 +184,10 @@ Kuribo.prototype.update = function(map,mario,moveNum){
 		// chapter37
 		this.gravityAction(map);
 		this.collisionWithMario(map,mario);
+		// chapter39
+		for(var i = 0;i < mario.MAX_FIRE_NUM;++i){
+			this.collisionWithFire(mario.fire[i]);	
+		}
 	}
 	this.deadAction();
 }
@@ -196,6 +200,19 @@ Kuribo.prototype.deadAction = function(){
 	if(this.state == DEAD_ACTION)
 	{
 		if(this.deadCnt++ == DEAD_ANIM_FRAME){
+			this.state = DEAD;
+		}
+	}
+	else if(this.state == DEAD_FIRE_ACTION){
+		// 重力を加算
+		this.addPosY += GRAVITY_POWER;
+		// 落下量調整
+		if(this.addPosY >= MAX_GRAVITY){
+		  this.addPosY = MAX_GRAVITY;
+		}
+		this.posY += this.addPosY;
+		// 画面外まで落ちたら、処理を止める
+		if(this.posY >= DISPLAY_HEIGHT){
 			this.state = DEAD;
 		}
 	}
@@ -264,5 +281,28 @@ Kuribo.prototype.collisionY = function(map,posY){
 		// 地面についた
 		this.posY += this.addPosY;
 		this.addPosY = 0;
+	}
+}
+
+/**
+ * chapter39
+ * collision with fire
+ * 
+ * fire:fire class
+ */
+Kuribo.prototype.collisionWithFire = function(fire){
+	if(fire.state == NORMAL_STATE){
+		// x軸
+		if(fire.posX < this.posX + 32 && fire.posX + FIRE_SIZE > this.posX){
+			// y軸
+			if(fire.posY < this.posY + 32 && fire.posY + FIRE_SIZE > this.posY){
+				// fire用の死亡アニメーション
+				this.state = DEAD_FIRE_ACTION;
+				// 少しジャンプさせる
+				this.addPosY = -8;
+				// ファイアーにも消えるアニメーションを設定する
+				fire.collisionWithBlock();
+			}
+		}
 	}
 }

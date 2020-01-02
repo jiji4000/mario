@@ -60,6 +60,12 @@ function Mario(posX,posY){
   // chapter38
   this.fireKinoko = new FireKinoko(0,0);
   this.textureOffsetY = 0;
+  // chapter39
+  this.MAX_FIRE_NUM = 3;
+  this.fire = [];
+  for(var i = 0;i < this.MAX_FIRE_NUM;++i){
+	  this.fire[i] = new Fire(0,0);
+  }
 }
 
 /*
@@ -503,9 +509,21 @@ Mario.prototype.update = function(mapChip,kuribos){
 	  this.collisionWithMapItem(mapChip);
 	  // blockが動いたことによる当たり判定
 	  this.blockCollisionAction(kuribos);
+	  
+	  // fireShot処理
+	  if(gADown){
+		  // key状態を解除
+		  gADown = false;
+		  this.shotFire();
+	  }	  
 	  // scroll処理
 	  this.doMapScrollX();
 	}
+	// update fire
+	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
+		this.fire[i].update(mapChip,this.moveNumX,this.mapScrollX);
+	}
+	
 	// 死亡後処理
 	this.deadAction();
 }
@@ -627,4 +645,20 @@ Mario.prototype.isBig = function(){
 		return true;
 	}
 	return false;
+}
+
+/**
+ * chapter39
+ * ファイアマリオ状態時にファイアを打たせる
+ */
+Mario.prototype.shotFire = function(){
+	if(this.state == FIRE_STATE){
+		for(var i = 0;i < this.MAX_FIRE_NUM;++i){
+			// 非活性のものを探す
+			if(this.fire[i].state == INACTIVE){
+				this.fire[i].shot(this.moveNumX,this.posY,this.direction);
+				break;
+			}
+		}
+	}
 }
