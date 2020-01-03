@@ -49,8 +49,7 @@ Fire.prototype.draw = function(ctx,texture,scrollX){
  * direction : 発射される方向(定数を使う)
  */
 Fire.prototype.shot = function(posX,posY,direction){
-	this.posY = posY + 24;
-	this.updateMapPosition();
+	this.posY = posY + 24;	
 	this.state = NORMAL_STATE;
 	if(direction == RIGHT_DIR){
 		this.posX = posX + 24;	
@@ -60,6 +59,8 @@ Fire.prototype.shot = function(posX,posY,direction){
 		this.addX = -7;
 	}
 	this.addY = -2;
+	// マップ座標を更新
+	this.updateMapPosition();
 }
 
 /*
@@ -69,7 +70,6 @@ Fire.prototype.shot = function(posX,posY,direction){
 */
 Fire.prototype.move = function(mapChip){
 	if(this.state != END_ANIMATION){
-		this.updateMapPosition();
 		// x方向の移動
 		this.posX += this.addX;
 		this.updateMapPositionX(this.posX);
@@ -84,7 +84,7 @@ Fire.prototype.move = function(mapChip){
 			}
 			this.collisionY(mapChip,this.posY - this.addY);
 			this.posY -= this.addY;
-			this.updateMapPosition();
+			this.updateMapPositionY(this.posY);
 		}
 	}
 }
@@ -120,9 +120,9 @@ Fire.prototype.collisionY = function(map,posY){
 	}
 	// ファイアの下側とぶつかった場合(跳ね返り処理)
 	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){		
-		var centerY = this.posY;
-		var vecY = Math.abs((centerY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
-//		// Yの加算量調整
+		// 地面との差分
+		var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
+		// Yの加算量調整
 		this.addY = this.BOUND_POWER;
 		// 跳ね返らせる
 		this.posY -= (this.addY + Math.abs(MAP_SIZE - vecY));
