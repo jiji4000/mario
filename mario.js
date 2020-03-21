@@ -282,23 +282,12 @@ Mario.prototype.collisionY = function(map,posY){
 
       // キノコブロックだった場合(chapter34&38)
       if(isKinokoBlock(map[this.upMapY][mapsX[i]])){
-    	// when mario is big appear fire kinoko
-    	if(this.isBig()){
-    		// chapter38 appear fire kinoko
-	        var fireKinokoX = mapsX[i] * MAP_SIZE;
-	        // appeared from box
-	        var fireKinokoY = this.upMapY * MAP_SIZE;
-	        this.fireKinoko.activate(fireKinokoX,fireKinokoY);    		
-    	}
-    	else{
-	        // appear kinoko
-	        var kinokoX = mapsX[i] * MAP_SIZE;
-	        // boxから出現させるようにする
-	        var kinokoY = this.upMapY * MAP_SIZE;
-	        this.kinoko.activate(kinokoX,kinokoY,LEFT_DIR);		
-    	}
-        // ボックスを空にする
-        replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+    	  // chapter40 キノコを有効化する処理を関数にした
+    	  var kinokoPosX = mapsX[i] * MAP_SIZE;
+    	  var kinokoPosY = this.upMapY * MAP_SIZE;
+    	  this.activateKinoko(kinokoPosX,kinokoPosY,LEFT_DIR);
+    	  // ボックスを空にする
+    	  replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
       }
       
       // ブロックのアニメーション
@@ -470,8 +459,11 @@ Mario.prototype.getFireKinoko = function(){
 
 /**
 	マリオの更新関数
+	
+	kuribos:マリオのブロックアクション時に連動させるクリボの配列
+	nokos:マリオのブロックアクション時に連動させるノコノコの配列
 */
-Mario.prototype.update = function(mapChip,kuribos){
+Mario.prototype.update = function(mapChip,kuribos,nokos){
 	if(!this.isDead()){
 	  // マップ座標の更新
 	  this.updateMapPosition();
@@ -508,7 +500,7 @@ Mario.prototype.update = function(mapChip,kuribos){
 	  // マップチップアイテムオブジェクトとの当たり判定
 	  this.collisionWithMapItem(mapChip);
 	  // blockが動いたことによる当たり判定
-	  this.blockCollisionAction(kuribos);
+	  this.blockCollisionAction(kuribos,nokos);
 	  
 	  // fireShot処理
 	  if(gADown){
@@ -607,8 +599,11 @@ Mario.prototype.animateBlock = function(map){
  * chapter37
  * blockが移動したときのcollision eventを発生させる
  * collisionのところで呼ぶ
+ * 
+ * kuribos:マップチップアクションの対象となるクリボの配列
+ * nokos:マップチップアクションの対象となるクリボの配列
 */
-Mario.prototype.blockCollisionAction = function(kuribos){
+Mario.prototype.blockCollisionAction = function(kuribos,nokos){
 	for(var i = 0;i < MAX_MAP_BLOCK;++i){
 		// ブロック破壊フラグ
 		if(this.isBlockAttack[i]){
@@ -619,7 +614,13 @@ Mario.prototype.blockCollisionAction = function(kuribos){
 				for(var j = 0;j < kuribos.length;++j){
 					kuribos[j].blockUpAction(this.blockAttackX[i][0],this.blockAttackY[i][0] - HALF_MAP_SIZE);
 				}
-			}			
+			}
+			// ノコノコの当たり判定
+			if(nokos != null){
+				for(var j = 0;j < nokos.length;++j){
+					nokos[j].blockUpAction(this.blockAttackX[i][0],this.blockAttackY[i][0] - HALF_MAP_SIZE);
+				}
+			}
 		}
 		// ブロック上昇処理
 		else if(this.isBlockUp[i]){
@@ -629,6 +630,12 @@ Mario.prototype.blockCollisionAction = function(kuribos){
 			if(kuribos != null){
 				for(var j = 0;j < kuribos.length;++j){
 					kuribos[j].blockUpAction(this.blockUpX[i],this.blockUpY[i]);
+				}
+			}
+			// ノコノコ
+			if(nokos != null){
+				for(var j = 0;j < nokos.length;++j){
+					nokos[j].blockUpAction(this.blockUpX[i],this.blockUpY[i]);
 				}
 			}
 		}
@@ -660,5 +667,17 @@ Mario.prototype.shotFire = function(){
 				break;
 			}
 		}
+	}
+}
+
+/**
+ * chapter40
+ * キノコを有効化する関数
+ */
+Mario.prototype.activateKinoko = function(posX,posY,direction){
+	if(this.isBig()){
+		this.fireKinoko.activate(posX,posY);
+	}else{
+		this.kinoko.activate(posX,posY,direction);
 	}
 }

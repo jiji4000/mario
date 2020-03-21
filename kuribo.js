@@ -296,13 +296,22 @@ Kuribo.prototype.collisionWithFire = function(fire){
 		if(fire.posX < this.posX + 32 && fire.posX + FIRE_SIZE > this.posX){
 			// y軸
 			if(fire.posY < this.posY + 32 && fire.posY + FIRE_SIZE > this.posY){
-				// fire用の死亡アニメーション
-				this.state = DEAD_FIRE_ACTION;
-				// 少しジャンプさせる
-				this.addPosY = -8;
+				this.setDeadCollisionAction();
 				// ファイアーにも消えるアニメーションを設定する
 				fire.collisionWithBlock();
 			}
 		}
 	}
+}
+
+/**
+ * chapter40
+ * 
+ * set collision reaction
+ */
+Kuribo.prototype.setDeadCollisionAction = function(){
+	// fire用の死亡アニメーション
+	this.state = DEAD_FIRE_ACTION;
+	// 少しジャンプさせる
+	this.addPosY = -8;
 }
