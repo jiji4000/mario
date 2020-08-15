@@ -79,3 +79,16 @@ function isBlockMap(mapNumber){
 	}
 	return false;
 }
+
+/**
+	chapter41
+	starブロック判定
+	
+	mapNumber : マップチップ番号
+*/
+function isStarBlock(mapNumber){
+	if(mapNumber == 83){
+		return true;
+	}
+	return false;
+}

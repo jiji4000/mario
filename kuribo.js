@@ -157,6 +157,11 @@ Kuribo.prototype.collisionWithMario = function(map,mario){
 				// 踏みつけ判定(キャラの半分より上の場合踏みつけと判定させる)
 				// マリオの下がクリボの上よりも下にある
 				if(mario.posY + mario.height > this.posY + (32 - this.height)){
+					// chapter41:star処理
+					if(mario.isStar){
+						this.setDeadCollisionAction();
+						return;
+					}
 					// マリオの下がクリボの中間地点よりも上にある
 					if(mario.posY + mario.height <= this.posY + (32 - this.height) + (this.height / 2)){
 						// 潰れたアニメーションにする

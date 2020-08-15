@@ -303,6 +303,11 @@ Noko.prototype.collisionWithMario = function(map,mario){
 				if(marioPosY <= this.posY + this.height){
 					// マリオの下がノコノコの上よりも上にある
 					if(marioPosY + mario.height >= this.posY){
+						// chapter41:マリオがstar状態
+						if(mario.isStar){
+							this.setDeadCollisionAction()
+							return;
+						}
 						// ノコノコの動きを止めるアクション、ノコノコが歩いている時と甲羅移動中の当たり判定はクリボと同じ
 						if(this.state == NORMAL_STATE || this.state == NOKO_ATTACK_STATE){
 							// マリオの下がノコノコの中間地点よりも上にある

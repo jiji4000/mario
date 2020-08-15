@@ -66,6 +66,11 @@ function Mario(posX,posY){
   for(var i = 0;i < this.MAX_FIRE_NUM;++i){
 	  this.fire[i] = new Fire(0,0);
   }
+  // chapter41
+  this.star = new Star(0,0,LEFT_DIR);
+  this.isStar = false;
+  this.starOffsetX = 0;
+  this.starTimer = 0;		// star状態の時間
 }
 
 /*
@@ -74,8 +79,8 @@ function Mario(posX,posY){
 	texture:img class
 */
 Mario.prototype.draw = function(ctx,texture){
-	if(!this.isDead()) {
-		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + this.textureOffsetY,32,this.height,this.posX,this.posY,32,this.height);
+	if(!this.isDead()) {				
+		ctx.drawImage(texture,this.starOffsetX + (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + this.textureOffsetY,32,this.height,this.posX,this.posY,32,this.height);		    
 	}
 	else {
 		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,this.direction * this.height + this.textureOffsetY,32,this.height,this.posX,this.posY,32,this.height);
@@ -289,6 +294,16 @@ Mario.prototype.collisionY = function(map,posY){
     	  // ボックスを空にする
     	  replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
       }
+
+      // starブロックだった場合(chapter41)
+      if(isStarBlock(map[this.upMapY][mapsX[i]])){
+    	  // chapter40 キノコを有効化する処理を関数にした
+    	  let starPosX = mapsX[i] * MAP_SIZE;
+    	  let starPosY = this.upMapY * MAP_SIZE;
+    	  this.star.activate(starPosX,starPosY,LEFT_DIR);
+    	  // ボックスを空にする
+    	  replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+      }      
       
       // ブロックのアニメーション
       if(isBlockMap(map[this.upMapY][mapsX[i]])){
@@ -469,25 +484,25 @@ Mario.prototype.update = function(mapChip,kuribos,nokos){
 	  this.updateMapPosition();
 		// 左キーが押されている状態
 		if(gLeftPush){
-	    if(gSpacePush){
-	        this.setIsDash(true);
-			    this.moveX(mapChip,-DASH_SPEED);
-	    }
-	    else{
-	      this.setIsDash(false);
-	      this.moveX(mapChip,-NORMAL_SPPED);
-	    }
+		    if(gSpacePush){
+		        this.setIsDash(true);
+				    this.moveX(mapChip,-DASH_SPEED);
+		    }
+		    else{
+		      this.setIsDash(false);
+		      this.moveX(mapChip,-NORMAL_SPPED);
+		    }
 		}
 		// →キーが押されている状態
 		if(gRightPush){
-	    if(gSpacePush){
-	        this.setIsDash(true);
-			    this.moveX(mapChip,DASH_SPEED);
-	    }
-	    else{
-	      this.setIsDash(false);
-	      this.moveX(mapChip,NORMAL_SPPED);
-	    }
+		    if(gSpacePush){
+		        this.setIsDash(true);
+				    this.moveX(mapChip,DASH_SPEED);
+		    }
+		    else{
+		      this.setIsDash(false);
+		      this.moveX(mapChip,NORMAL_SPPED);
+		    }
 		}
 
 	  // ジャンプ動作
@@ -510,6 +525,8 @@ Mario.prototype.update = function(mapChip,kuribos,nokos){
 	  }	  
 	  // scroll処理
 	  this.doMapScrollX();
+	  // star処理
+	  this.starAction();
 	}
 	// update fire
 	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
@@ -680,4 +697,47 @@ Mario.prototype.activateKinoko = function(posX,posY,direction){
 	}else{
 		this.kinoko.activate(posX,posY,direction);
 	}
+}
+
+/**
+ * chapter41
+ * star状態の処理
+ */
+Mario.prototype.starAction = function(){
+	if(this.isStar){
+		this.starTimer++;
+		// 10秒まで
+		if(this.starTimer < 600){
+			if(this.starTimer % 4 == 0){
+				this.starOffsetX += 256;
+				if(this.starOffsetX >= 1024){
+					this.starOffsetX = 0;
+				}
+			}
+		// 消える期間(初代では目安12秒だった)
+		}else if(this.starTimer >= 600 && this.starTimer < 720){
+			if(this.starTimer % 8 == 0){
+				this.starOffsetX += 256;
+				if(this.starOffsetX >= 1024){
+					this.starOffsetX = 0;
+				}
+			}
+		}
+		// 完全終了
+		else{
+			this.isStar = false;
+			this.starOffsetX = 0;
+			this.starTimer = 0;
+		}
+	}
+}
+
+/**
+ * chapter41
+ * star取得時の処理
+ */
+Mario.prototype.getStar = function(){
+	this.isStar = true;
+	this.starOffsetX = 0;
+	this.starTimer = 0;		
 }
