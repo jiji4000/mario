@@ -35,42 +35,55 @@ function Mario(posX,posY){
 	// chapter27
 	this.state = NORMAL_STATE;
 	this.height = 32;
-  // chapter30
-  this.coinNum = 0;
-  this.playerNum = 3;
-  // chapter33
-  this.isBlockCoinAnim = [false,false];
-  this.blockCoinFrame = [0,0];
-  this.blockCoinX = [0,0];
-  this.blockCoinY = [0,0];
-  // chapter34
-  this.kinoko = new Kinoko(0,0,LEFT_DIR);
-  // chapter37
-  this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標X
-  this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標Y
-  this.blockAttackCnt = [0,0];			// animation cnt
-  this.blockAttackIndex = 0;			// blockのindex
-  this.isBlockUp = [false,false];		// ブロック上昇フラグ
-  this.isBlockAttack = [false,false];	// 破壊フラグ
-  this.blockAttackAddY = [0,0];			// ブロックの移動量Y
-  this.blockUpX = [0,0];				// 上昇ブロック用座標X
-  this.blockUpY = [0,0];				// 上昇ブロック用座標Y
-  this.blockAttackIndexX = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号X
-  this.blockAttackIndexY = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号Y
-  // chapter38
-  this.fireKinoko = new FireKinoko(0,0);
-  this.textureOffsetY = 0;
-  // chapter39
-  this.MAX_FIRE_NUM = 3;
-  this.fire = [];
-  for(var i = 0;i < this.MAX_FIRE_NUM;++i){
-	  this.fire[i] = new Fire(0,0);
-  }
-  // chapter41
-  this.star = new Star(0,0,LEFT_DIR);
-  this.isStar = false;
-  this.starOffsetX = 0;
-  this.starTimer = 0;		// star状態の時間
+	// chapter30
+	this.coinNum = 0;
+	this.playerNum = 3;
+	// chapter33
+	this.isBlockCoinAnim = [false,false];
+	this.blockCoinFrame = [0,0];
+	this.blockCoinX = [0,0];
+	this.blockCoinY = [0,0];
+	// chapter34
+	this.kinoko = new Kinoko(0,0,LEFT_DIR);
+	// chapter37
+	this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標X
+	this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標Y
+	this.blockAttackCnt = [0,0];			// animation cnt
+	this.blockAttackIndex = 0;			// blockのindex
+	this.isBlockUp = [false,false];		// ブロック上昇フラグ
+	this.isBlockAttack = [false,false];	// 破壊フラグ
+	this.blockAttackAddY = [0,0];			// ブロックの移動量Y
+	this.blockUpX = [0,0];				// 上昇ブロック用座標X
+	this.blockUpY = [0,0];				// 上昇ブロック用座標Y
+	this.blockAttackIndexX = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号X
+	this.blockAttackIndexY = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号Y
+	// chapter38
+	this.fireKinoko = new FireKinoko(0,0);
+	this.textureOffsetY = 0;
+	// chapter39
+	this.MAX_FIRE_NUM = 3;
+	this.fire = [];
+	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
+		this.fire[i] = new Fire(0,0);
+	}
+	// chapter41
+	this.star = new Star(0,0,LEFT_DIR);
+	this.isStar = false;
+	this.starOffsetX = 0;
+	this.starTimer = 0;		// star状態の時間
+	// chapter42
+	this.docanMoveCnt = 0;			// 土管移動用カウンター
+	this.mapMoveStage = MAP_ONE;		// 遷移先マップ
+	this.docanfirstMoveDirection = DOCAN_UP;	// 移動方向
+	this.docanEndMoveDirection = DOCAN_UP;	// 移動方向
+	this.isMapMove = false;			// map移動中フラグ
+	this.isSecondMapMove = false;		// 土管から出てくる時のフラグ
+	this.docanPosX1 = 0;				// 最初に遷移するX
+	this.docanPosY1 = 0;				// 最初に遷移するY
+	this.docanPosX2 = 0;				// 遷移後のx
+	this.docanPosY2 = 0;				// 遷移後のy
+	this.newMapSizeX = 0;				// 新規マップのマップ描画量
+	this.keyDisable = false;			// キー入力を受け付けないフラグ
 }
 
 /*
@@ -105,16 +118,7 @@ Mario.prototype.moveX = function(mapChip,moveX){
 	this.updateMapPositionX(this.moveNumX);
 	// ダッシュ時のアニメーションは早くする
 	var cnt = this.isDash ? 2 : 1;
-	this.animCnt += cnt;
-
-	// animation
-	if(this.animCnt >= 12){
-		this.animCnt = 0;
-		// 一定以上に達したらアニメーションを更新する
-		if(++this.animX > 3){
-			this.animX = 0;
-		}
-	}
+	this.increseAnimCnt(cnt);
 }
 
 Mario.prototype.setIsDash = function(isDash){
@@ -138,8 +142,14 @@ Mario.prototype.setJumpSettings = function(isDash){
 	isPush : 対象のキーが押されているか
 */
 Mario.prototype.jumpAction = function(isPush,mapChip){
-	this.addPosY = this.jumpPower;
-	this.collisionY(mapChip,this.posY - this.addPosY);
+	// 移動量を2分割する
+	for(var i = 2;i > 0;--i){
+		this.addPosY = parseInt(this.jumpPower / i);
+		// 当たり判定があった場合は抜ける
+		if(this.collisionY(mapChip,this.posY - this.addPosY)){
+			break;
+		}
+	}
 	this.posY -= this.addPosY;
 	// 落下中はジャンプさせないようにする
 	if(this.addPosY < 0){
@@ -155,7 +165,6 @@ Mario.prototype.jumpAction = function(isPush,mapChip){
 			this.jumpPower -= GRAVITY_POWER;
 		}
 	}
-	//console.log("jumpPower = " + this.jumpPower);
 }
 
 /**
@@ -246,95 +255,107 @@ Mario.prototype.updateMapPosition = function(){
 	オブジェクトとの当たり判定X
 */
 Mario.prototype.collisionX = function(map,posX){
-	this.updateMapPositionX(posX);
-	// マリオの右側
-	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.rightMapX]) || isObjectMap(map[this.centerMapY][this.rightMapX])){
-		// (加算される前の)中心点からの距離を取る
-		var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.rightMapX * MAP_SIZE) + HALF_MAP_SIZE));
-		this.addPosX = Math.abs(MAP_SIZE - vecX);
-	}
-	// マリオの左側
-	else if(isObjectMap(map[this.downMapY][this.leftMapX]) || isObjectMap(map[this.upMapY][this.leftMapX]) || isObjectMap(map[this.centerMapY][this.leftMapX])){
-		// (加算される前の)中心点からの距離を取る
-		var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.leftMapX * MAP_SIZE) + HALF_MAP_SIZE));
-		this.addPosX = -Math.abs(MAP_SIZE - vecX);
+	// マップ移動中は当たり判定を起こさない
+	if(!this.isMapMove){
+		this.updateMapPositionX(posX);
+		// マリオの右側
+		if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.upMapY][this.rightMapX]) || isObjectMap(map[this.centerMapY][this.rightMapX])){
+			// (加算される前の)中心点からの距離を取る
+			var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.rightMapX * MAP_SIZE) + HALF_MAP_SIZE));
+			this.addPosX = Math.abs(MAP_SIZE - vecX);
+		}
+		// マリオの左側
+		else if(isObjectMap(map[this.downMapY][this.leftMapX]) || isObjectMap(map[this.upMapY][this.leftMapX]) || isObjectMap(map[this.centerMapY][this.leftMapX])){
+			// (加算される前の)中心点からの距離を取る
+			var vecX = Math.abs((this.moveNumX + HALF_MAP_SIZE) - ((this.leftMapX * MAP_SIZE) + HALF_MAP_SIZE));
+			this.addPosX = -Math.abs(MAP_SIZE - vecX);
+		}
 	}
 }
 
 /**
-	chapter20
-	オブジェクトとの当たり判定Y
-*/
+ * Y軸方向の当たり判定
+ * 
+ * @param {*} map 
+ * @param {*} posY 
+ * 
+ * return : 当たり判定の有無
+ */
 Mario.prototype.collisionY = function(map,posY){
-	this.updateMapPositionY(posY);
-  // マップ座標xを配列で保管する
-  var mapsX = [this.rightMapX,this.leftMapX];
-  for(var i = 0;i < 2;++i){
-  	// マリオの上側に当たった場合
-  	if(isObjectMap(map[this.upMapY][mapsX[i]])){
-      // コインブロックだった場合
-      if(isCoinBlock(map[this.upMapY][mapsX[i]])){
-        // コインブロック用のアニメーションをセットする
-        var coinX = mapsX[i] * MAP_SIZE;
-        // 一つ上にセットする
-        var coinY = (this.upMapY - 1) * MAP_SIZE;
-        this.setBlockCoinMapAnim(i,coinX,coinY);
-        // ボックスを空にする
-        replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
-        // coinの取得
-        this.getCoin();
-      }
+	if(!this.isMapMove){
+		this.updateMapPositionY(posY);
+		// マップ座標xを配列で保管する
+		var mapsX = [this.rightMapX,this.leftMapX];
+		for(var i = 0;i < 2;++i){
+			// マリオの上側に当たった場合
+			if(isObjectMap(map[this.upMapY][mapsX[i]])){
+				// コインブロックだった場合
+				if(isCoinBlock(map[this.upMapY][mapsX[i]])){
+					// コインブロック用のアニメーションをセットする
+					var coinX = mapsX[i] * MAP_SIZE;
+					// 一つ上にセットする
+					var coinY = (this.upMapY - 1) * MAP_SIZE;
+					this.setBlockCoinMapAnim(i,coinX,coinY);
+					// ボックスを空にする
+					replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+					// coinの取得
+					this.getCoin();
+				}
 
-      // キノコブロックだった場合(chapter34&38)
-      if(isKinokoBlock(map[this.upMapY][mapsX[i]])){
-    	  // chapter40 キノコを有効化する処理を関数にした
-    	  var kinokoPosX = mapsX[i] * MAP_SIZE;
-    	  var kinokoPosY = this.upMapY * MAP_SIZE;
-    	  this.activateKinoko(kinokoPosX,kinokoPosY,LEFT_DIR);
-    	  // ボックスを空にする
-    	  replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
-      }
+				// キノコブロックだった場合(chapter34&38)
+				if(isKinokoBlock(map[this.upMapY][mapsX[i]])){
+					// chapter40 キノコを有効化する処理を関数にした
+					var kinokoPosX = mapsX[i] * MAP_SIZE;
+					var kinokoPosY = this.upMapY * MAP_SIZE;
+					this.activateKinoko(kinokoPosX,kinokoPosY,LEFT_DIR);
+					// ボックスを空にする
+					replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+				}
 
-      // starブロックだった場合(chapter41)
-      if(isStarBlock(map[this.upMapY][mapsX[i]])){
-    	  // chapter40 キノコを有効化する処理を関数にした
-    	  let starPosX = mapsX[i] * MAP_SIZE;
-    	  let starPosY = this.upMapY * MAP_SIZE;
-    	  this.star.activate(starPosX,starPosY,LEFT_DIR);
-    	  // ボックスを空にする
-    	  replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
-      }      
-      
-      // ブロックのアニメーション
-      if(isBlockMap(map[this.upMapY][mapsX[i]])){
-    	  var posX = mapsX[i] * MAP_SIZE;
-    	  var posY = this.upMapY * MAP_SIZE;
-    	  this.blockAction(mapsX[i],this.upMapY,false,map);
-      }
+				// starブロックだった場合(chapter41)
+				if(isStarBlock(map[this.upMapY][mapsX[i]])){
+					// chapter40 キノコを有効化する処理を関数にした
+					let starPosX = mapsX[i] * MAP_SIZE;
+					let starPosY = this.upMapY * MAP_SIZE;
+					this.star.activate(starPosX,starPosY,LEFT_DIR);
+					// ボックスを空にする
+					replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+				}      
+				
+				// ブロックのアニメーション
+				if(isBlockMap(map[this.upMapY][mapsX[i]])){
+					var posX = mapsX[i] * MAP_SIZE;
+					var posY = this.upMapY * MAP_SIZE;
+					this.blockAction(mapsX[i],this.upMapY,false,map);
+				}
 
-      // (加算される前の)中心点からの距離をみる
-      var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
-      // Yの加算量調整
-      this.addPosY = Math.abs(MAP_SIZE - vecY);
-      // 落下させる
-      this.jumpPower = 0;
-  	}
-  }
-	// マリオの下側
-	if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){
-		// (加算される前の)中心点からの距離を見る
-		var centerY = this.height == 64 ? this.posY + 32 : this.posY;
-		var vecY = Math.abs((centerY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
-		// Yの加算量調整
-		this.addPosY = Math.abs(MAP_SIZE - vecY);
-		// 地面についた
-		this.posY += this.addPosY;
-		this.addPosY = 0;
-		this.jumpPower = 0;
-		this.isJump = false;
-		// リセットアニメーション
-		this.animOffsetX = 0;
+				// (加算される前の)中心点からの距離をみる
+				var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
+				// Yの加算量調整
+				this.addPosY = Math.abs(MAP_SIZE - vecY);
+				// 落下させる
+				this.jumpPower = 0;
+				return true;
+			}
+		}
+		// マリオの下側
+		if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){
+			// (加算される前の)中心点からの距離を見る
+			var centerY = this.height == 64 ? this.posY + 32 : this.posY;
+			var vecY = Math.abs((centerY + HALF_MAP_SIZE) - ((this.downMapY * MAP_SIZE) + HALF_MAP_SIZE));
+			// Yの加算量調整
+			this.addPosY = Math.abs(MAP_SIZE - vecY);
+			// 地面についた
+			this.posY += this.addPosY;
+			this.addPosY = 0;
+			this.jumpPower = 0;
+			this.isJump = false;
+			// リセットアニメーション
+			this.animOffsetX = 0;
+			return true;
+		}
 	}
+	return false;
 }
 
 /**
@@ -477,56 +498,83 @@ Mario.prototype.getFireKinoko = function(){
 	
 	kuribos:マリオのブロックアクション時に連動させるクリボの配列
 	nokos:マリオのブロックアクション時に連動させるノコノコの配列
+	docans:土管オブジェクト
 */
-Mario.prototype.update = function(mapChip,kuribos,nokos){
+Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 	if(!this.isDead()){
 	  // マップ座標の更新
 	  this.updateMapPosition();
 		// 左キーが押されている状態
-		if(gLeftPush){
-		    if(gSpacePush){
-		        this.setIsDash(true);
-				    this.moveX(mapChip,-DASH_SPEED);
-		    }
-		    else{
-		      this.setIsDash(false);
-		      this.moveX(mapChip,-NORMAL_SPPED);
-		    }
+		if(!this.keyDisable){
+			if(gLeftPush){
+				for(var i = 0;i < docans.length;++i){
+					this.docanXEnter(docans[i],LEFT_DIR);
+				}
+				if(gSpacePush){
+					this.setIsDash(true);
+					this.moveX(mapChip,-DASH_SPEED);
+				}
+				else{
+					this.setIsDash(false);
+					this.moveX(mapChip,-NORMAL_SPPED);
+				}
+			}
 		}
 		// →キーが押されている状態
-		if(gRightPush){
-		    if(gSpacePush){
-		        this.setIsDash(true);
-				    this.moveX(mapChip,DASH_SPEED);
-		    }
-		    else{
-		      this.setIsDash(false);
-		      this.moveX(mapChip,NORMAL_SPPED);
-		    }
+		if(!this.keyDisable){
+			if(gRightPush){
+				for(var i = 0;i < docans.length;++i){
+					this.docanXEnter(docans[i],RIGHT_DIR);
+				}
+				if(gSpacePush){
+					this.setIsDash(true);
+					this.moveX(mapChip,DASH_SPEED);
+				}
+				else{
+					this.setIsDash(false);
+					this.moveX(mapChip,NORMAL_SPPED);
+				}
+			}
 		}
+		// 下キーが押された
+		if(!this.keyDisable){
+			if(gDownPush){
+				console.log(this.moveNumX + " : " + this.posY);
+				for(var i = 0;i < docans.length;++i){
+					this.docanDownEnter(docans[i]);
+				}
+			}
+		}
+		this.docanMove();
 
-	  // ジャンプ動作
-	  if(gUpPush){
-	    // ジャンプ設定をオンにする
-	    this.setJumpSettings(gSpacePush);
-	  }
-	  // ジャンプ処理
-	  this.jumpAction(gUpPush,mapChip);
-	  // マップチップアイテムオブジェクトとの当たり判定
-	  this.collisionWithMapItem(mapChip);
-	  // blockが動いたことによる当たり判定
-	  this.blockCollisionAction(kuribos,nokos);
-	  
-	  // fireShot処理
-	  if(gADown){
-		  // key状態を解除
-		  gADown = false;
-		  this.shotFire();
-	  }	  
-	  // scroll処理
-	  this.doMapScrollX();
-	  // star処理
-	  this.starAction();
+	  	// ジャンプ動作
+	  	if(!this.keyDisable){
+			if(gUpPush){
+				// ジャンプ設定をオンにする
+				this.setJumpSettings(gSpacePush);
+			}
+		}
+		// ジャンプ処理
+		if(!this.isMapMove){
+			this.jumpAction(gUpPush,mapChip);
+		}
+		// マップチップアイテムオブジェクトとの当たり判定
+		this.collisionWithMapItem(mapChip);
+		// blockが動いたことによる当たり判定
+		this.blockCollisionAction(kuribos,nokos);
+			
+		// fireShot処理
+		if(!this.keyDisable){
+			if(gADown){
+				// key状態を解除
+				gADown = false;
+				this.shotFire();
+			}
+		}
+		// scroll処理
+		this.doMapScrollX();
+		// star処理
+		this.starAction();
 	}
 	// update fire
 	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
@@ -740,4 +788,218 @@ Mario.prototype.getStar = function(){
 	this.isStar = true;
 	this.starOffsetX = 0;
 	this.starTimer = 0;		
+}
+
+/**
+ * chapter42 ドカンが下方向に突入できるか判定
+ * @param {*} docan 
+ */
+Mario.prototype.docanDownEnter = function(docan){
+	let offset = 8
+	// x軸
+	if(this.moveNumX >= docan.posX + offset && this.moveNumX + 32 <= docan.posX + docan.width - offset){
+		// デカくなったときはサイズが変わる
+		let tall = this.isBig() ? 32 : 0;
+		// y軸
+		if(this.posY + tall == docan.posY){
+			this.setDocanParam(docan);
+		}
+	}
+}
+
+/**
+ * 
+ * @param {土管クラス} docan 
+ * @param {マリオの移動方向} direction 
+ */
+Mario.prototype.docanXEnter = function(docan,direction){
+	// y軸:地面についていないと侵入できない
+	if(this.posY + this.height == docan.posY + docan.height){
+		// マリオが左方向かつ土管が左方向に進む場合
+		if(direction == LEFT_DIR && docan.firstDirection == DOCAN_LEFT){
+			// x座標
+			if(this.moveNumX == docan.posX + docan.width){			
+				this.setDocanParam(docan)
+			}
+		}
+		// マリオが右方向かつ土管が右方向に進む
+		else if(direction == RIGHT_DIR && docan.firstDirection == DOCAN_RIGHT){
+			// x座標
+			if(this.moveNumX + MAP_SIZE == docan.posX){
+				this.setDocanParam(docan)
+			}
+		}
+	}
+}
+
+/**
+ * 土管移動用のパラメータをセットする
+ * @param {*} docan 
+ */
+Mario.prototype.setDocanParam = function(docan){
+	this.isMapMove = true;		// マップ移動中フラグ(当たり判定などをおこさせない)
+	this.keyDisable = true;		// キー操作無効フラグ
+	this.mapMoveStage = docan.mapNumber;		// マップ移動番号
+	this.docanFirstMoveDirection = docan.firstDirection;	// ドカンに入る際にマリオがに移動する方向
+	this.docanEndMoveDirection = docan.endDirection;		// ドカンから出る際ににマリオが移動する方向
+	this.isSecondMapMove = false;		// 入る際はfalse,出る際はtrue
+	this.newMapSizeX = docan.mapSizeX;	// 新しいマップのXサイズスクロール判定に使用する
+	// でかい時にずれる量を調整する
+	let height = this.isBig() ? 32 : 0;
+
+	// 土管の出る位置によってスタート地点を変える
+	switch(this.docanEndMoveDirection){
+		case DOCAN_UP:
+			// 出てくる位置を2つ下げる
+			this.docanPosY1 = docan.endY + (MAP_SIZE * 2) - height;
+			this.docanPosX1 = docan.endX;
+			this.docanPosY2 = docan.endY - height;
+			break;
+		case DOCAN_DOWN:
+			this.docanPosY1 = docan.endY - (MAP_SIZE * 2) - height;
+			this.docanPosX1 = docan.endX;
+			this.docanPosY2 = docan.endY;
+			break;
+		case DOCAN_RIGHT:
+			this.docanPosX1 = docan.endX - (MAP_SIZE * 2);
+			this.docanPosY1 = docan.endY;
+			this.docanPosX2 = docan.endX;
+			break;
+		case DOCAN_LEFT:
+			this.docanPosX1 = docan.endX - (MAP_SIZE * 2);
+			this.docanPosY1 = docan.endY;
+			this.docanPosX2 = docan.endX;
+			break;
+	}
+}
+
+/**
+ * chapter42
+ * 
+ * ドカン移動関数
+ */
+Mario.prototype.docanMove = function(){
+	if(this.isMapMove){
+		// 一回目の移動
+		if(!this.isSecondMapMove){
+			// マップ移動初期処理
+			if(this.docanMoveCnt++ >= DOCAN_MOVE_TIME){
+				this.docanMoveCnt = 0;
+				this.changeMap(this.mapMoveStage,this.newMapSizeX);	
+				this.posY = this.docanPosY1;
+				this.moveNumX = this.docanPosX1;
+				this.mapScrollX = 0;
+				if(this.moveNumX >= SCROLL_POINT_X && this.moveNumX < this.scrollEndX)
+				{
+					this.mapScrollX = this.moveNumX - SCROLL_POINT_X;		// マップスクロール量
+					this.posX = SCROLL_POINT_X;							// 固定
+					// マップを描画する範囲をずらす
+					this.maxDrawMapX = DRAW_MAX_MAP_X + Math.floor(this.mapScrollX / MAP_SIZE);			// 最大の描画範囲X
+					this.minDrawMapX = this.maxDrawMapX - DRAW_MAX_MAP_X;								// 最小の描画範囲X
+				}
+				else{
+					this.mapScrollX = 0;
+					this.posX = this.docanPosX1;
+					this.maxDrawMapX = DRAW_MAX_MAP_X;	// 最大の描画範囲X
+					this.minDrawMapX = 0;				// 最小の描画範囲X
+				}
+				this.isSecondMapMove = true;				
+			}
+			else{
+				// 土管からはみ出さないように最大移動量は64まで
+				if(this.docanMoveCnt <= 32){
+					// 移動
+					switch(this.docanFirstMoveDirection){
+						case DOCAN_UP:
+							this.posY -= 2;
+							break;
+						case DOCAN_DOWN:
+							this.posY += 2;
+							break;
+						case DOCAN_LEFT:
+							this.moveNumX -= 2;
+							// 歩いている動作をさせる
+							this.increseAnimCnt(2);
+							break;
+						case DOCAN_RIGHT:
+							this.moveNumX += 2;
+							// 歩いている動作をさせる
+							this.increseAnimCnt(2);
+							break;
+					}	
+				}
+			}
+		}
+		// 2回目(土管から出る場合)
+		else{
+			// 2秒で移動させたい、64 / 2 = 32フレで移動できるので、32引いてから移動を開始する
+			if(this.docanMoveCnt++ >= DOCAN_MOVE_TIME - 32){
+				// 移動方向を分ける
+				switch(this.docanEndMoveDirection){
+					case DOCAN_UP:
+						this.posY -= 2;
+						if(this.posY <= this.docanPosY2){
+							this.resetMapMove();
+						}
+						break;
+					case DOCAN_DOWN:
+						this.posY += 2;
+						if(this.posY >= this.docanPosY2){
+							this.resetMapMove();
+						}
+						break;
+					case DOCAN_LEFT:
+						this.moveNumX -= 2;
+						this.increseAnimCnt(2);
+						if(this.moveNumX >= this.docanPosX2){
+							this.resetMapMove();
+						}
+						break;
+					case DOCAN_RIGHT:
+						this.moveNumX += 2;
+						this.increseAnimCnt(2);
+						if(this.moveNumX <= this.docanPosX2){
+							this.resetMapMove();
+						}
+						break;
+				}
+			}
+		}
+	}
+}
+
+/**
+ * マップを変更する
+ */
+Mario.prototype.changeMap = function(mapNumber,length){
+	gMapStage = mapNumber;
+	// 描画範囲を変更
+	this.scrollEndX = (length - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
+}
+
+/**
+ * 
+ * @param {*移動アニメーションカウントを増やす} cnt 
+ */
+Mario.prototype.increseAnimCnt = function(cnt){
+	this.animCnt += cnt;
+	// animation
+	if(this.animCnt >= 12){
+		this.animCnt = 0;
+		// 一定以上に達したらアニメーションを更新する
+		if(++this.animX > 3){
+			this.animX = 0;
+		}
+	}
+}
+
+/**
+ * 土管の移動終了後にセットする変数
+ */
+Mario.prototype.resetMapMove = function(){
+	this.isMapMove = false;
+	this.keyDisable = false;
+	this.isSecondMapMove = false;
+	this.docanMoveCnt = 0;
+	this.updateMapPosition();
 }

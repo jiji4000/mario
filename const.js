@@ -55,3 +55,14 @@ var DISPLAY_WIDTH = 640;
 var NOKO_WAIT_STATE = 2;
 var NOKO_AWAKING_STATE =  3;
 var NOKO_ATTACK_STATE = 4;
+// chapter42
+// マップ番号はオブジェクトや敵などのindexに対応させる必要がある
+let MAP_ONE = 0;
+let MAP_TWO = 1;
+let MAP_THREE = 2;
+let DOCAN_LEFT = 0;
+let DOCAN_UP = 1;
+let DOCAN_RIGHT = 2;
+let DOCAN_DOWN = 3;
+// 土管を移動する時の遷移時間frame換算
+let DOCAN_MOVE_TIME = 120;
