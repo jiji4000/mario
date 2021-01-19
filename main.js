@@ -123,7 +123,7 @@ let gDocans = [
 // マップによって変化できるように配列で持つ
 let gDocanObjs = [
   [new DocanObj(384,352,DOCAN_UP),new DocanObj(2752,352,DOCAN_UP)],
-  [new DocanObj(32,64,DOCAN_DOWN),new DocanObj(576,384,DOCAN_LEFT)]
+  [new DocanObj(32,0,DOCAN_DOWN),new DocanObj(576,384,DOCAN_LEFT)]
 ];
 
 // アニメーションマップチップを入れる
