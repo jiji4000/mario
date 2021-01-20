@@ -1,0 +1,1 @@
+let gMapStage = MAP_ONE;
