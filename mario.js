@@ -84,6 +84,9 @@ function Mario(posX,posY){
 	this.docanPosY2 = 0;				// 遷移後のy
 	this.newMapSizeX = 0;				// 新規マップのマップ描画量
 	this.keyDisable = false;			// キー入力を受け付けないフラグ
+	// chapter43
+	this.isSit = false;				// offsetに利用したいので、0 1で管理する
+	this.textureHeight = MAP_SIZE;			// テクスチャを切り取る範囲Y
 }
 
 /*
@@ -92,12 +95,8 @@ function Mario(posX,posY){
 	texture:img class
 */
 Mario.prototype.draw = function(ctx,texture){
-	if(!this.isDead()) {				
-		ctx.drawImage(texture,this.starOffsetX + (this.animX * 32) + this.animOffsetX,(this.direction * this.height) + this.textureOffsetY,32,this.height,this.posX,this.posY,32,this.height);		    
-	}
-	else {
-		ctx.drawImage(texture, (this.animX * 32) + this.animOffsetX,this.direction * this.height + this.textureOffsetY,32,this.height,this.posX,this.posY,32,this.height);
-	}
+	let offsetY = this.isSit ? (29 + 64) : 0;
+	ctx.drawImage(texture,this.starOffsetX + (this.animX * 32) + this.animOffsetX,((this.direction * 2) * this.textureHeight) + this.textureOffsetY + offsetY,32,this.height,this.posX,this.posY,32,this.height);
 }
 
 Mario.prototype.moveX = function(mapChip,moveX){
@@ -480,9 +479,10 @@ Mario.prototype.isDead = function(){
  */
 Mario.prototype.getKinoko = function(){
 	this.state = KINOKO_STATE;
-	this.height = 64;
-	this.posY -= 32;
-	this.textureOffsetY = 64;
+	this.height = MAP_SIZE * 2;
+	this.posY -= MAP_SIZE;
+	this.textureOffsetY = 128;
+	this.textureHeight = MAP_SIZE * 2;
 }
 
 /**
@@ -490,7 +490,8 @@ Mario.prototype.getKinoko = function(){
  */
 Mario.prototype.getFireKinoko = function(){
 	this.state = FIRE_STATE;
-	this.textureOffsetY = 192;
+	this.textureOffsetY = 384;
+	this.textureHeight = MAP_SIZE * 2;
 }
 
 /**
@@ -505,7 +506,7 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 	  // マップ座標の更新
 	  this.updateMapPosition();
 		// 左キーが押されている状態
-		if(!this.keyDisable){
+		if(!this.keyDisable && !this.isSit){
 			if(gLeftPush){
 				for(var i = 0;i < docans.length;++i){
 					this.docanXEnter(docans[i],LEFT_DIR);
@@ -521,7 +522,7 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 			}
 		}
 		// →キーが押されている状態
-		if(!this.keyDisable){
+		if(!this.keyDisable && !this.isSit){
 			if(gRightPush){
 				for(var i = 0;i < docans.length;++i){
 					this.docanXEnter(docans[i],RIGHT_DIR);
@@ -536,14 +537,18 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 				}
 			}
 		}
+
 		// 下キーが押された
-		if(!this.keyDisable){
-			if(gDownPush){
-				console.log(this.moveNumX + " : " + this.posY);
+		if(gDownPush){
+			if(!this.keyDisable){
+				this.sit();
 				for(var i = 0;i < docans.length;++i){
 					this.docanDownEnter(docans[i]);
 				}
 			}
+		}
+		else{
+			this.sitRelease();
 		}
 		this.docanMove();
 
@@ -799,7 +804,7 @@ Mario.prototype.docanDownEnter = function(docan){
 	// x軸
 	if(this.moveNumX >= docan.posX + offset && this.moveNumX + 32 <= docan.posX + docan.width - offset){
 		// デカくなったときはサイズが変わる
-		let tall = this.isBig() ? 32 : 0;
+		let tall = this.height - 32;
 		// y軸
 		if(this.posY + tall == docan.posY){
 			this.setDocanParam(docan);
@@ -903,7 +908,12 @@ Mario.prototype.docanMove = function(){
 					this.maxDrawMapX = DRAW_MAX_MAP_X;	// 最大の描画範囲X
 					this.minDrawMapX = 0;				// 最小の描画範囲X
 				}
-				this.isSecondMapMove = true;				
+				this.isSecondMapMove = true;
+				
+				// しゃがみを解除する
+				if(this.docanFirstMoveDirection == DOCAN_DOWN && this.isBig()){
+					this.releaseSitParam();
+				}
 			}
 			else{
 				// 土管からはみ出さないように最大移動量は64まで
@@ -1003,3 +1013,49 @@ Mario.prototype.resetMapMove = function(){
 	this.docanMoveCnt = 0;
 	this.updateMapPosition();
 }
+
+/**
+ * chapter43
+ * 
+ * マリオが大きい状態ならば座る状態にする
+ * 
+ */
+Mario.prototype.sit = function(){
+	// 大きい状態のみ
+	if(this.canSit()){
+		this.isSit = true;
+		this.height = MAP_SIZE;
+		this.textureHeight = MAP_SIZE * 2;
+		this.posY += MAP_SIZE;
+		this.updateMapPositionY(this.posY);
+	}
+}
+
+/**
+ * 座る状態を解除する
+ */
+Mario.prototype.sitRelease = function(){
+	if(this.isSit && !this.isMapMove){
+		if(this.isBig()){
+			this.releaseSitParam();
+		}
+	}
+}
+
+Mario.prototype.releaseSitParam = function(){
+	this.height = MAP_SIZE * 2;
+	this.textureHeight = this.height;
+	this.posY -= MAP_SIZE;
+	this.updateMapPositionY(this.posY);
+	this.isSit = false;
+}
+
+/**
+ * chapter43
+ * 座れるか判定を返す
+ */
+Mario.prototype.canSit = function(){
+	// でかい　かつ　しゃがんでいない　かつ　ジャンプ中でない
+	return (this.isBig() && !this.isSit && !this.isJump);
+}
+
