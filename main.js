@@ -58,6 +58,7 @@ let gMapChip = [
 [112,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,114],
 [128,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,130]
 ];
+let gMapChipCopy = gMapChip;
 
 // 背景用のマップチップ
 var gBackGroundMapChip = [
@@ -95,6 +96,7 @@ let gBonusMapChip = [
 [64,-1,-1,-1,-1,-1,64,64,64,64,64,64,64,64,-1,-1,-1,-1,74,75],
 [64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64]
 ];
+let gBonusMapChipCopy = gBonusMapChip;
 
 let gBonusBackMapChip = [
 [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
@@ -125,6 +127,9 @@ let gDocanObjs = [
   [new DocanObj(384,352,DOCAN_UP),new DocanObj(2752,352,DOCAN_UP)],
   [new DocanObj(32,0,DOCAN_DOWN),new DocanObj(576,384,DOCAN_LEFT)]
 ];
+
+// ステージ前画からステージへゲームオーバーからタイトル画面へのカウンタ
+let moveStageCnt = 0;
 
 // アニメーションマップチップを入れる
 var ANIM_MAP_CHIPS = [33];
@@ -261,11 +266,37 @@ window.requestNextAnimationFrame =
 )
 ();
 
+/**
+ * ステージ1の敵の初期化
+ */
+function initStage1Enemy(){
+  // kuribo
+  gKuribos[0][0].init(1024,384,LEFT_DIR);
+  gKuribos[0][1].init(1088,384,LEFT_DIR);
+  // nokonoko
+  gNokos[0][0].init(384,396,RIGHT_DIR);
+  gNokos[0][1].init(192,396,LEFT_DIR);
+}
+
 /*
 	Draw
 	描画
 */
 function Draw(){
+  switch(gState){
+    case IN_STAGE:
+      drawInStage();
+      break;
+    case PRE_STAGE:
+      drawPreStage();
+      break;
+    case GAME_OVER:
+      drawGameOver();
+      break;
+  }
+}
+
+function drawInStage(){
   // 背景
   switch(gMapStage){
     case MAP_ONE:
@@ -315,6 +346,44 @@ function Draw(){
   gMario.animateBlock();
   // chapter41
   gMario.star.draw(g_Ctx,gMapTex,gMario.mapScrollX);
+}
+
+/**
+ * ステージ前処理の描画
+ */
+function drawPreStage(){
+  g_Ctx.fillStyle = "#000000";
+  g_Ctx.fillRect(0,0,640,480);
+  // 小さいマリオを描画
+  g_Ctx.drawImage(gMarioTex,0,64,32,32,320 - 32 - 60,240 - 16,32,32);
+  // 残機数
+  drawCoin(320 + 10 + 60,240 - (17 / 2),gMario.playerNum);
+  // multiply
+  g_Ctx.drawImage(gMapTex,480,480,32,32,320 - 32,240 - 16,32,32);
+  // stage名の描画
+  g_Ctx.font = "22px Sans-serif";
+  g_Ctx.fillStyle = "#ffffff";
+  g_Ctx.textAlign = "center";
+  // world
+  g_Ctx.fillText("WORLD", 250, 180);
+  // world number
+  let stageStr = gWorldNumber + " - " + gSubWorldNumber;
+  g_Ctx.fillText(stageStr,374,180);
+}
+
+/**
+ * ステージ前処理の描画
+ */
+function drawGameOver(){
+  // 黒で塗りつぶす
+  g_Ctx.fillStyle = "#000000";
+  g_Ctx.fillRect(0,0,640,480);
+  // stage名の描画
+  g_Ctx.font = "22px Sans-serif";
+  g_Ctx.fillStyle = "#ffffff";
+  g_Ctx.textAlign = "center";
+  // GAMEOVER
+  g_Ctx.fillText("GAME OVER", 320, 240);
 }
 
 /**
@@ -440,6 +509,20 @@ function isAnimationMap(mapIndex){
 }
 
 function move(){
+  switch(gState){
+    case PRE_STAGE:
+      movePreStage();
+      break;
+    case GAME_OVER:
+      moveGameOver();
+      break;
+    case IN_STAGE:
+      moveInStage();
+      break;
+  }
+}
+
+function moveInStage(){
   switch(gMapStage){
     case MAP_ONE:
       gMario.update(gMapChip,gKuribos[gMapStage],gNokos[gMapStage],gDocans[gMapStage]);
@@ -454,8 +537,49 @@ function move(){
       gMario.star.update(gBonusMapChip,gMario);
       break;
   }
-
   enemyMove();
+}
+
+/**
+ * ステージ前段階からステージへ進むまでの処理
+ */
+function movePreStage(){
+  if(moveStageCnt++ >= PRE_STAGE_CNT){
+    // ステージ毎に初期化する
+    initStage();
+    moveStageCnt = 0;
+    gState = IN_STAGE;
+  }
+}
+
+/**
+ * ステージ毎の初期化を行う
+ */
+function initStage(){
+  switch(gTotalStageNumber){
+    case 1:
+      initStage1();
+      break;
+  }
+}
+
+/**
+ * stage1用の初期化
+ */
+function initStage1(){
+  // 敵の初期化
+  initStage1Enemy();
+  // マップ初期化
+  gMapChip = gMapChipCopy;
+  gBonusMapChip = gBonusMapChipCopy;
+  gMario.init(0,384);
+}
+
+/**
+ * ゲームオーバーからタイトル画面へ移るときの処理
+ */
+function moveGameOver(){
+
 }
 
 function enemyMove(){

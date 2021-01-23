@@ -66,3 +66,11 @@ let DOCAN_RIGHT = 2;
 let DOCAN_DOWN = 3;
 // 土管を移動する時の遷移時間frame換算
 let DOCAN_MOVE_TIME = 120;
+// chapter44
+let TITLE = 0
+let IN_STAGE = 1;
+let PRE_STAGE = 2;
+let GAME_OVER = 3;
+let CONTINUE_CNT = 60;
+let PRE_STAGE_CNT = 150;
+

@@ -41,6 +41,48 @@ function Noko(posX,posY,dir){
 	this.isStickyMario = false;
 }
 
+/**
+ * ノコノコ初期化関数
+ * 
+ * @param {*} posX 
+ * @param {*} posY 
+ * @param {*} dir 
+ */
+Noko.prototype.init = function(posX,posY,dir){
+	// 変数
+	this.posX = posX;
+	this.posY = posY;
+	this.addPosX = 0;
+	this.addPosY = 0;
+	this.animCnt = 0;
+	this.animX = 0;
+	this.animY = 0;
+	this.direction = dir;
+	this.rightMapX = 0;
+	this.leftMapX = 0;
+	this.upMapY = 0;
+	this.downMapY = 0;
+	// chapter27
+	this.state = NORMAL_STATE;
+	this.height = this.NORMAL_HEIGHT;
+	this.deadCnt = 0;
+	// 甲羅状態の移動量
+	this.ATTACK_MOVE_X = 7;
+	// block破壊用変数
+	this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標X
+	this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標Y
+	this.blockAttackCnt = [0,0];			// animation cnt
+	this.blockAttackIndex = 0;			// blockのindex
+	this.isBlockAttack = [false,false];	// 破壊フラグ
+	this.blockAttackAddY = [0,0];			// ブロックの移動量Y
+	this.blockAttackIndexX = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号
+	this.blockAttackIndexY = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号Y
+	// 甲羅状態から復帰するためのアニメーション変数
+	this.normalBackCnt = 0;
+	// マリオと当たり判定があった場合一度マリオから離れてからでないと当たり判定を起こさせないためのフラグ
+	this.isStickyMario = false;
+}
+
 /*
 	描画関数
 	ctx:context

@@ -22,6 +22,36 @@ function Kuribo(posX,posY,dir){
 	this.deadCnt = 0;
 }
 
+/**
+ * 初期化関数
+ * @param {*} posX 
+ * @param {*} posY 
+ * @param {*} dir 
+ */
+Kuribo.prototype.init = function(posX,posY,dir){
+	this.posX = posX;
+	this.posY = posY;
+	// chapter25敵の移動
+	this.addPosX = 0;
+	// chapter37
+	this.addPosY = 0;
+	// どのタイミングでアニメーションを切り替えるか
+	this.animCnt = 0;
+	// 切り出す始点のX座標
+	this.animX = 0;
+	this.animY = 0;
+	this.direction = dir;
+	// マップチップ座標
+	this.rightMapX = 0;
+	this.leftMapX = 0;
+	this.upMapY = 0;
+	this.downMapY = 0;
+	// chapter27
+	this.state = NORMAL_STATE;
+	this.height = 16;
+	this.deadCnt = 0;
+}
+
 /*
 	描画関数
 	ctx:context

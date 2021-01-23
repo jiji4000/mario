@@ -87,6 +87,100 @@ function Mario(posX,posY){
 	// chapter43
 	this.isSit = false;				// offsetに利用したいので、0 1で管理する
 	this.textureHeight = MAP_SIZE;			// テクスチャを切り取る範囲Y
+	// chapter44
+	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面にいきまでのタイマー時間
+}
+
+/**
+ * マリオの初期化
+ * @param {*} posX 
+ * @param {*} posY 
+ */
+Mario.prototype.init = function(posX,posY){
+	this.addPosX = 0;
+	this.addPosY = 0;
+	this.posX = posX;
+	this.posY = posY;
+	// どのタイミングでアニメーションを切り替えるか
+	this.animCnt = 0;
+	// 切り出す始点のX座標
+	this.animX = 0;
+	this.animOffsetX = 0;
+	// 方向を切り替えるための変数
+	this.direction = RIGHT_DIR;
+	// ダッシュフラグ
+	this.isDash = false;
+	// ジャンプ
+	this.isJump = false;
+	this.jumpCnt = 0;
+	this.jumpPower = 0;
+	// マップチップ座標
+	this.rightMapX = 0;
+	this.leftMapX = 0;
+	this.upMapY = 0;
+	this.downMapY = 0;
+	// chapter26
+	this.centerMapY = 0;
+	// chapter22スクロール処理
+	this.maxDrawMapX = DRAW_MAX_MAP_X;			// 最大の描画範囲X
+	this.minDrawMapX = 0;		// 最小の描画範囲X
+	this.mapScrollX = 0;		// スクロール量X
+	this.moveNumX = 0;			// 総移動量X
+	this.scrollEndX = (100 - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
+	// chapter27
+	this.state = NORMAL_STATE;
+	this.height = 32;
+	// chapter33
+	this.isBlockCoinAnim = [false,false];
+	this.blockCoinFrame = [0,0];
+	this.blockCoinX = [0,0];
+	this.blockCoinY = [0,0];
+	// chapter34
+	this.kinoko = new Kinoko(0,0,LEFT_DIR);
+	// chapter37
+	this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標X
+	this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標Y
+	this.blockAttackCnt = [0,0];			// animation cnt
+	this.blockAttackIndex = 0;			// blockのindex
+	this.isBlockUp = [false,false];		// ブロック上昇フラグ
+	this.isBlockAttack = [false,false];	// 破壊フラグ
+	this.blockAttackAddY = [0,0];			// ブロックの移動量Y
+	this.blockUpX = [0,0];				// 上昇ブロック用座標X
+	this.blockUpY = [0,0];				// 上昇ブロック用座標Y
+	this.blockAttackIndexX = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号X
+	this.blockAttackIndexY = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号Y
+	// chapter38
+	this.fireKinoko = new FireKinoko(0,0);
+	this.textureOffsetY = 0;
+	// chapter39
+	this.MAX_FIRE_NUM = 3;
+	this.fire = [];
+	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
+		this.fire[i] = new Fire(0,0);
+	}
+	// chapter41
+	this.star = new Star(0,0,LEFT_DIR);
+	this.isStar = false;
+	this.starOffsetX = 0;
+	this.starTimer = 0;		// star状態の時間
+	// chapter42
+	this.docanMoveCnt = 0;			// 土管移動用カウンター
+	this.mapMoveStage = MAP_ONE;		// 遷移先マップ
+	this.docanfirstMoveDirection = DOCAN_UP;	// 移動方向
+	this.docanEndMoveDirection = DOCAN_UP;	// 移動方向
+	this.isMapMove = false;			// map移動中フラグ
+	this.isSecondMapMove = false;		// 土管から出てくる時のフラグ
+	this.docanPosX1 = 0;				// 最初に遷移するX
+	this.docanPosY1 = 0;				// 最初に遷移するY
+	this.docanPosX2 = 0;				// 遷移後のx
+	this.docanPosY2 = 0;				// 遷移後のy
+	this.newMapSizeX = 0;				// 新規マップのマップ描画量
+	this.keyDisable = false;			// キー入力を受け付けないフラグ
+	// chapter43
+	this.isSit = false;				// offsetに利用したいので、0 1で管理する
+	this.textureHeight = MAP_SIZE;			// テクスチャを切り取る範囲Y
+	// chapter44
+	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面にいきまでのタイマー時間
 }
 
 /*
@@ -450,8 +544,7 @@ Mario.prototype.collisionWithEnemy = function(){
 	死亡演出
 */
 Mario.prototype.deadAction = function(){
-	if(this.state == DEAD_ACTION)
-	{
+	if(this.state == DEAD_ACTION){
 		this.posY -= this.addPosY;		// 上昇と下降
 		if(this.addPosY >= -MAX_GRAVITY)
 		{
@@ -460,6 +553,18 @@ Mario.prototype.deadAction = function(){
 		if(this.posY > 480)
 		{
 			this.state = DEAD;		// 死亡
+		}
+	}
+	else if(this.state == DEAD){
+		// 一定時間たったらコンテニュー画面へ
+		if(this.continueCnt++ >= CONTINUE_CNT){
+			this.playerNum--;
+			if(this.playerNum <= 0){
+				gState = GAME_OVER;
+			}
+			else{
+				gState = PRE_STAGE;
+			}
 		}
 	}
 }
