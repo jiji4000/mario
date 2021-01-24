@@ -71,6 +71,8 @@ let TITLE = 0
 let IN_STAGE = 1;
 let PRE_STAGE = 2;
 let GAME_OVER = 3;
+// マリオがやられてからコンテニュー画面に行くまでの時間
 let CONTINUE_CNT = 60;
+// ステージ前画面からステージ画面へ遷移するまでの時間
 let PRE_STAGE_CNT = 150;
 

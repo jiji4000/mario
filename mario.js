@@ -88,7 +88,7 @@ function Mario(posX,posY){
 	this.isSit = false;				// offsetに利用したいので、0 1で管理する
 	this.textureHeight = MAP_SIZE;			// テクスチャを切り取る範囲Y
 	// chapter44
-	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面にいきまでのタイマー時間
+	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面に遷移するまでのタイマー時間
 }
 
 /**
@@ -135,8 +135,6 @@ Mario.prototype.init = function(posX,posY){
 	this.blockCoinFrame = [0,0];
 	this.blockCoinX = [0,0];
 	this.blockCoinY = [0,0];
-	// chapter34
-	this.kinoko = new Kinoko(0,0,LEFT_DIR);
 	// chapter37
 	this.blockAttackX = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標X
 	this.blockAttackY = [[0,0,0,0],[0,0,0,0]];		// Block破壊時の座標Y
@@ -149,17 +147,8 @@ Mario.prototype.init = function(posX,posY){
 	this.blockUpY = [0,0];				// 上昇ブロック用座標Y
 	this.blockAttackIndexX = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号X
 	this.blockAttackIndexY = [0,0];		// ブロックを移動させる対象のブロックマップチップ番号Y
-	// chapter38
-	this.fireKinoko = new FireKinoko(0,0);
 	this.textureOffsetY = 0;
 	// chapter39
-	this.MAX_FIRE_NUM = 3;
-	this.fire = [];
-	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
-		this.fire[i] = new Fire(0,0);
-	}
-	// chapter41
-	this.star = new Star(0,0,LEFT_DIR);
 	this.isStar = false;
 	this.starOffsetX = 0;
 	this.starTimer = 0;		// star状態の時間
@@ -180,7 +169,7 @@ Mario.prototype.init = function(posX,posY){
 	this.isSit = false;				// offsetに利用したいので、0 1で管理する
 	this.textureHeight = MAP_SIZE;			// テクスチャを切り取る範囲Y
 	// chapter44
-	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面にいきまでのタイマー時間
+	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面に遷移するのタイマー時間
 }
 
 /*
