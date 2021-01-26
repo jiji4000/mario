@@ -89,6 +89,11 @@ function Mario(posX,posY){
 	this.textureHeight = MAP_SIZE;			// テクスチャを切り取る範囲Y
 	// chapter44
 	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面に遷移するまでのタイマー時間
+	// chapter45
+	this.oneUpKinoko = new OneUpKinoko(0,0,LEFT_DIR);
+	// one upを表示するタイマー
+	this.oneUpCnt = 0;
+	this.isDrawOneUp = false;
 }
 
 /**
@@ -411,6 +416,15 @@ Mario.prototype.collisionY = function(map,posY){
 					this.blockAction(mapsX[i],this.upMapY,false,map);
 				}
 
+				// one up blockだった場合
+				if(isOneUpBlock(map[this.upMapY][mapsX[i]])){
+					let posX = mapsX[i] * MAP_SIZE;
+					let posY = this.upMapY * MAP_SIZE;
+					this.oneUpKinoko.activate(posX,posY,LEFT_DIR);
+					// ボックスを空にする
+					replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+				}
+
 				// (加算される前の)中心点からの距離をみる
 				var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
 				// Yの加算量調整
@@ -674,6 +688,8 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 		this.doMapScrollX();
 		// star処理
 		this.starAction();
+		// one up動作
+		this.oneUpAction();
 	}
 	// update fire
 	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
@@ -773,6 +789,8 @@ Mario.prototype.blockCollisionAction = function(kuribos,nokos){
 		if(this.isBlockAttack[i]){
 			// きのこの上昇処理(ずらした分を考慮)
 			this.kinoko.blockUpAction(this.blockAttackX[i][0],this.blockAttackY[i][0] - HALF_MAP_SIZE);
+			// one up kinokoの上昇処理
+			this.oneUpKinoko.blockUpAction(this.blockAttackX[i][0],this.blockAttackY[i][0] - HALF_MAP_SIZE);
 			// クリボの当たり判定
 			if(kuribos != null){
 				for(var j = 0;j < kuribos.length;++j){
@@ -790,6 +808,7 @@ Mario.prototype.blockCollisionAction = function(kuribos,nokos){
 		else if(this.isBlockUp[i]){
 			// きのこの上昇処理
 			this.kinoko.blockUpAction(this.blockUpX[i],this.blockUpY[i]);
+			this.oneUpKinoko.blockUpAction(this.blockUpX[i],this.blockUpY[i]);
 			// クリボ
 			if(kuribos != null){
 				for(var j = 0;j < kuribos.length;++j){
@@ -1153,3 +1172,35 @@ Mario.prototype.canSit = function(){
 	return (this.isBig() && !this.isSit && !this.isJump);
 }
 
+/**
+ * chapter45
+ * 
+ * OneUpKinokoを取得した時
+ */
+Mario.prototype.getOneUpKinoko = function(){
+	if(this.playerNum < MAX_PLAYER_NUM){
+		this.playerNum++;
+		this.isDrawOneUp = true;
+	}
+}
+
+/**
+ * one upの表示関数
+ */
+Mario.prototype.oneUpAction = function(){
+	if(this.isDrawOneUp){
+		if(this.oneUpCnt++ >= ONE_UP_CNT){
+			this.oneUpCnt = 0;
+			this.isDrawOneUp = false;
+		}
+	}
+}
+
+/**
+ * oneupの描画
+ */
+Mario.prototype.drawOneUp = function(ctx,texture){
+	if(this.isDrawOneUp){
+		ctx.drawImage(texture,416,480,64,32,this.posX - 16,this.posY - (this.oneUpCnt / 4) - 32,64,32);
+	}
+}

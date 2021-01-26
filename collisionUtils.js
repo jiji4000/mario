@@ -92,3 +92,14 @@ function isStarBlock(mapNumber){
 	}
 	return false;
 }
+
+/**
+ * isOneUpBlock
+ * @param {*} mapNumber 
+ */
+function isOneUpBlock(mapNumber){
+	if(mapNumber == 84){
+		return true;
+	}
+	return false;
+}

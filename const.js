@@ -76,3 +76,7 @@ let CONTINUE_CNT = 60;
 // ステージ前画面からステージ画面へ遷移するまでの時間
 let PRE_STAGE_CNT = 150;
 
+// chapter45
+let MAX_PLAYER_NUM = 99;
+let ONE_UP_CNT = 80;
+
