@@ -347,7 +347,7 @@ function drawInStage(){
   gMario.animateBlock();
   // chapter41
   gMario.star.draw(g_Ctx,gMapTex,gMario.mapScrollX);
-  // chapter44
+  // chapter45
   gMario.oneUpKinoko.draw(g_Ctx,gMapTex,gMario.mapScrollX);
 }
 
