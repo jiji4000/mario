@@ -539,8 +539,7 @@ Mario.prototype.doMapScrollX = function(){
 	敵と当たった時のアクション
 */
 Mario.prototype.collisionWithEnemy = function(){
-	this.state = DEAD_ACTION;
-	this.addPosY = 14;
+	this.setDeadParam();
 }
 
 /**
@@ -1203,4 +1202,21 @@ Mario.prototype.drawOneUp = function(ctx,texture){
 	if(this.isDrawOneUp){
 		ctx.drawImage(texture,416,480,64,32,this.posX - 16,this.posY - (this.oneUpCnt / 4) - 32,64,32);
 	}
+}
+
+/**
+ * マリオ時間切れ時の処理
+ */
+Mario.prototype.timeOut = function(){
+	if(!this.isDead()){
+		this.setDeadParam();
+	}
+}
+
+/**
+ * やれれ処理ようの値をセットする
+ */
+Mario.prototype.setDeadParam = function(){
+	this.state = DEAD_ACTION;
+	this.addPosY = 14;
 }

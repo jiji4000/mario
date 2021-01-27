@@ -80,3 +80,7 @@ let PRE_STAGE_CNT = 150;
 let MAX_PLAYER_NUM = 99;
 let ONE_UP_CNT = 80;
 
+// chapter46
+// 各々のステージごとに決められた制限時間
+let STAGE_TIMES = [(60 * 60 * 3),];
+

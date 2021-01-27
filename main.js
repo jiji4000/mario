@@ -128,6 +128,9 @@ let gDocanObjs = [
   [new DocanObj(32,0,DOCAN_DOWN),new DocanObj(576,384,DOCAN_LEFT)]
 ];
 
+// chapter46
+let timer = new Timer(STAGE_TIMES[0]);
+
 // ステージ前画からステージへゲームオーバーからタイトル画面へのカウンタ
 let moveStageCnt = 0;
 
@@ -317,6 +320,10 @@ function drawInStage(){
       break;
   }
 
+  // chapter46 timer
+  g_Ctx.drawImage(gMapTex,352,480,64,32, 550,0, 64, 32);
+  drawNumber(615,32,Math.floor(timer.cnt / 60),0.8,0.8);
+  
   gMario.draw(g_Ctx,gMarioTex);
   gMario.drawOneUp(g_Ctx,gMapTex);
   for(var i = 0;i < gMario.MAX_FIRE_NUM;++i){
@@ -335,7 +342,13 @@ function drawInStage(){
     gDocanObjs[gMapStage][i].draw(g_Ctx,gMapTex,gMario.mapScrollX);
   }
   
-  drawCoin(630,10,gMario.coinNum);
+  // コイン
+  g_Ctx.drawImage(gMapTex,32,64,32,32,280,8,22,22);
+  // ×
+  g_Ctx.drawImage(gMapTex,480,480,32,32,311,8,22,22);
+  // コイン数
+  drawNumber(343,10,gMario.coinNum,1,1,false);
+  
   drawBlockCoin();
   // chapter37
   drawBlock();
@@ -358,11 +371,11 @@ function drawPreStage(){
   g_Ctx.fillStyle = "#000000";
   g_Ctx.fillRect(0,0,640,480);
   // 小さいマリオを描画
-  g_Ctx.drawImage(gMarioTex,0,64,32,32,320 - 32 - 60,240 - 16,32,32);
+  g_Ctx.drawImage(gMarioTex,0,64,32,32,228,224,32,32);
   // 残機数
-  drawCoin(320 + 10 + 60,240 - (17 / 2),gMario.playerNum);
+  drawNumber(390,231.5,gMario.playerNum);
   // multiply
-  g_Ctx.drawImage(gMapTex,480,480,32,32,320 - 32,240 - 16,32,32);
+  g_Ctx.drawImage(gMapTex,480,480,32,32,288,224,32,32);
   // stage名の描画
   g_Ctx.font = "22px Sans-serif";
   g_Ctx.fillStyle = "#ffffff";
@@ -433,20 +446,25 @@ function drawObjectMap(map){
 }
 
 /**
-	コインの枚数の描画
-*/
-function drawCoin(posX,posY,coinNum){
+ * 数値の描画
+ * @param {*} posX 
+ * @param {*} posY 
+ * @param {*} coinNum 
+ * @param {*} scaleX 
+ * @param {*} scaleY 
+ */
+function drawNumber(posX,posY,coinNum,scaleX = 1,scaleY = 1,fromRight = true){
   var digits = getDigits(coinNum);	// 桁数を取得
   var maxNumber = getMaxNumber(digits);
   // 描画位置
-  var numberPosX = posX - (digits * 25);
+  var numberPosX = fromRight == true ? posX - (digits * 25 * scaleX) : posX;
   // 全て描画するまで
   while(maxNumber >= 1){
     // 一番上の桁数から描画する
-    g_Ctx.drawImage(gCoinTex, Math.floor((coinNum / maxNumber )) * 20,0,20,17, numberPosX,posY, 20, 17);
+    g_Ctx.drawImage(gCoinTex, Math.floor((coinNum / maxNumber )) * 20,0,20,17, numberPosX,posY, 20 * scaleX, 17 * scaleY);
     coinNum -= Math.floor((coinNum / maxNumber)) * maxNumber;				// 一番上の桁数を引く(111だったら100を引く)
     maxNumber = Math.floor(maxNumber / 10);		// 111 = 11にする
-    numberPosX += 25;
+    numberPosX += (25 * scaleX);
   }
 }
 
@@ -542,6 +560,11 @@ function moveInStage(){
       break;
   }
   enemyMove();
+  // 時間更新
+  if(timer.update()){
+    // 時間切れ死亡処理
+    gMario.timeOut();
+  }
 }
 
 /**
@@ -565,6 +588,7 @@ function initStage(){
       initStage1();
       break;
   }
+  initStageTimes(gTotalStageNumber);
 }
 
 /**
@@ -577,6 +601,14 @@ function initStage1(){
   gMapChip = JSON.parse(JSON.stringify(gMapChipCopy));
   gBonusMapChip = JSON.parse(JSON.stringify(gBonusMapChipCopy));
   gMario.init(0,384);
+}
+
+/**
+ * ステージごとにの時間の初期化
+ * @param {*} stageNum 
+ */
+function initStageTimes(stageNum){
+  timer.cnt = STAGE_TIMES[stageNum - 1];
 }
 
 /**
