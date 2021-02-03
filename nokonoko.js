@@ -39,6 +39,12 @@ function Noko(posX,posY,dir){
 	this.normalBackCnt = 0;
 	// マリオと当たり判定があった場合一度マリオから離れてからでないと当たり判定を起こさせないためのフラグ
 	this.isStickyMario = false;
+	// chapter47
+	this.score = 100;
+	this.isDrawScore = false;
+	this.scoreCnt = 0;
+	// 連続して甲羅を倒した数
+	this.sequenceAttackCnt = 0;
 }
 
 /**
@@ -81,6 +87,11 @@ Noko.prototype.init = function(posX,posY,dir){
 	this.normalBackCnt = 0;
 	// マリオと当たり判定があった場合一度マリオから離れてからでないと当たり判定を起こさせないためのフラグ
 	this.isStickyMario = false;
+	// chapter47
+	this.score = 100;
+	this.scoreCnt = 0;
+	this.isDrawScore = false;
+	this.sequenceAttackCnt = 0;
 }
 
 /*
@@ -89,12 +100,14 @@ Noko.prototype.init = function(posX,posY,dir){
 	texture:img class
 	scrollX:X軸のスクロール量
 */
-Noko.prototype.draw = function(ctx,texture,scrollX){
+Noko.prototype.draw = function(ctx,texture,scoreTex,oneUpTex,scrollX){
 	if(this.state != DEAD){
 		ctx.drawImage(texture, (this.animX * 32) + (this.direction * 128),this.animY + (MAP_SIZE - this.height),32,this.height,this.posX - scrollX,this.posY,32,this.height);
 	}
 	// 甲羅でブロックを破壊した時用のブロックマップチップの描画
 	this.drawBlock(ctx,texture,scrollX);
+	// スコアの表示
+	this.drawScore(ctx,scoreTex,oneUpTex,scrollX);
 }
 
 Noko.prototype.drawBlock = function(ctx,texture,scrollX){
@@ -365,7 +378,15 @@ Noko.prototype.collisionWithMario = function(map,mario){
 									// 歩く状態に戻るアニメーションカウントを戻す
 									this.normalBackCnt = 0;
 									this.animY = 32;
-									mario.jumpPower = STEP_UP_NUM;
+									// ノコノコが連続して倒している場合大きい方のスコアを代入する
+									if(mario.sequenceJumpCnt + 1 < this.sequenceAttackCnt){
+										mario.sequenceJumpCnt = this.sequenceAttackCnt;
+									}
+									mario.stompAction();
+									this.score = mario.getScore();
+									// 甲羅を止めたら、連続カウントを0に戻す
+									this.sequenceAttackCnt = 0;
+									this.setDrawScore();
 									this.isSticky = true;
 								}
 								return;
@@ -411,19 +432,25 @@ Noko.prototype.collisionWithMario = function(map,mario){
  * nokos: ノコノコの配列
  * 
 */
-Noko.prototype.collisionWithEnemy = function(kuribos,nokos){
+Noko.prototype.collisionWithEnemy = function(kuribos,nokos,mario){
 	// 攻撃状態のみ
 	if(this.state == NOKO_ATTACK_STATE){
 		// クリボ
 		if(kuribos != null){
 			for(var i = 0;i < kuribos.length;++i){
-				// x軸
-				if(kuribos[i].posX < this.posX + 32 && kuribos[i].posX + 32 > this.posX){
-					// クリボの上とノコノコの下
-					if(kuribos[i].posY <= this.posY + this.height){
-						// クリボの下がノコノコの上よりも上にある
-						if(kuribos[i].posY + 32 >= this.posY){
-							kuribos[i].setDeadCollisionAction();
+				// 死亡チェック
+				if(!kuribos[i].isDead()){
+					// x軸
+					if(kuribos[i].posX < this.posX + 32 && kuribos[i].posX + 32 > this.posX){
+						// クリボの上とノコノコの下
+						if(kuribos[i].posY <= this.posY + this.height){
+							// クリボの下がノコノコの上よりも上にある
+							if(kuribos[i].posY + 32 >= this.posY){
+								// 連続ヒット数を伸ばす
+								this.increaseSequenceAttackCnt(mario);
+								kuribos[i].score = this.getScore();
+								kuribos[i].setDeadCollisionAction();					
+							}
 						}
 					}
 				}
@@ -432,21 +459,27 @@ Noko.prototype.collisionWithEnemy = function(kuribos,nokos){
 		// nokonoko自身も渡されるので自身は覗く
 		if(nokos != null){
 			for(var i = 0;i < nokos.length;++i){
-				// ノコノコとの当たり判定があった場合に死亡状態になるので、死亡判定をする必要がある
-				if(!this.isDead()){
-					// 自身も渡されるので、自身との判定は除く
-					if(nokos[i] != this){
-						// x軸
-						if(nokos[i].posX < this.posX + 32 && nokos[i].posX + 32 > this.posX){
-							// ノコノコ上とノコノコの下
-							if(nokos[i].posY <= this.posY + this.height){
-								// クリボの下がノコノコの上よりも上にある
-								if(nokos[i].posY + nokos[i].height >= this.posY){
-									// 相手ノコノコが攻撃状態の場合は自身も当たり判定を呼ぶ
-									if(nokos[i].state == NOKO_ATTACK_STATE){
-										this.setDeadCollisionAction();
+				// 死亡チェック
+				if(!nokos[i].isDead()){
+					// ノコノコとの当たり判定があった場合に死亡状態になるので、死亡判定をする必要がある
+					if(!this.isDead()){
+						// 自身も渡されるので、自身との判定は除く
+						if(nokos[i] != this){
+							// x軸
+							if(nokos[i].posX < this.posX + 32 && nokos[i].posX + 32 > this.posX){
+								// ノコノコ上とノコノコの下
+								if(nokos[i].posY <= this.posY + this.height){
+									// クリボの下がノコノコの上よりも上にある
+									if(nokos[i].posY + nokos[i].height >= this.posY){
+										this.increaseSequenceAttackCnt(mario);
+										// 相手ノコノコが攻撃状態の場合は自身も当たり判定を呼ぶ
+										if(nokos[i].state == NOKO_ATTACK_STATE){
+											this.score = this.getScore();
+											this.setDeadCollisionAction();
+										}
+										nokos[i].score = this.getScore();
+										nokos[i].setDeadCollisionAction();
 									}
-									nokos[i].setDeadCollisionAction();
 								}
 							}
 						}
@@ -465,13 +498,14 @@ Noko.prototype.update = function(map,mario,kuribos,nokos,moveNum){
 		this.move(map,moveNum,mario);
 		this.gravityAction(map);
 		this.collisionWithMario(map,mario);
-		this.collisionWithEnemy(kuribos,nokos);
+		this.collisionWithEnemy(kuribos,nokos,mario);
 		// fireとの当たり判定
 		for(var i = 0;i < mario.MAX_FIRE_NUM;++i){
 			this.collisionWithFire(mario.fire[i]);	
 		}
 	}
-	this.animateBlock(map)
+	this.animateBlock(map);
+	this.updateScoreCnt();
 	this.deadAction();
 }
 
@@ -566,10 +600,7 @@ Noko.prototype.collisionWithFire = function(fire){
 		if(fire.posX < this.posX + 32 && fire.posX + FIRE_SIZE > this.posX){
 			// y軸
 			if(fire.posY < this.posY + 32 && fire.posY + FIRE_SIZE > this.posY){
-				// fire用の死亡アニメーション
-				this.state = DEAD_FIRE_ACTION;
-				// 少しジャンプさせる
-				this.addPosY = -8;
+				this.setDeadCollisionAction();
 				// ファイアーにも消えるアニメーションを設定する
 				fire.collisionWithBlock();
 			}
@@ -581,8 +612,63 @@ Noko.prototype.collisionWithFire = function(fire){
  * set collision reaction
  */
 Noko.prototype.setDeadCollisionAction = function(){
+	// スコアを表示させる
+	this.setDrawScore();
 	// fire用の死亡アニメーション
 	this.state = DEAD_FIRE_ACTION;
 	// 少しジャンプさせる
 	this.addPosY = -8;
+}
+
+/**
+ * スコアを描画する
+ * @param {*} ctx 
+ * @param {*} texture 
+ * @param {*} oneUpTex 
+ * @param {*} scrollX 
+ */
+Noko.prototype.drawScore = function(ctx,texture,oneUpTex,scrollX){
+	if(this.isDrawScore && this.state != DEAD){
+		drawEnemyScore(ctx,texture,oneUpTex,this.posX - scrollX,this.posY - 16,this.score);
+	}
+}
+
+/**
+ * スコアの表示時間を管理する
+ */
+Noko.prototype.updateScoreCnt = function(){
+	if(this.isDrawScore){
+		if(this.scoreCnt++ >= 120){
+			this.isDrawScore = false;
+		}
+	}
+}
+
+/**
+ * スコア描画フラグを立てる
+ */
+Noko.prototype.setDrawScore = function(){
+	this.isDrawScore = true;
+	this.scoreCnt = 0;
+}
+
+/**
+ * 甲羅での連続アタック数を延ばす
+ * 一定数を超えるとoneup
+ */
+Noko.prototype.increaseSequenceAttackCnt = function(mario){
+	if(++this.sequenceAttackCnt >= STOMPING_SCORES.length - 1){
+		this.sequenceAttackCnt = STOMPING_SCORES.length - 1;
+		mario.playerNum++;
+	}else{
+		// 1upでなかったら、スコアに加算する
+		gScore += this.getScore();
+	}
+}
+
+/**
+ * 連続倒しを加味したスコアを返す
+ */
+Noko.prototype.getScore = function(){
+	return STOMPING_SCORES[this.sequenceAttackCnt];
 }

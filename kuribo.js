@@ -20,6 +20,8 @@ function Kuribo(posX,posY,dir){
 	this.state = NORMAL_STATE;
 	this.height = 16;
 	this.deadCnt = 0;
+	// chapter47
+	this.score = 100;
 }
 
 /**
@@ -50,6 +52,8 @@ Kuribo.prototype.init = function(posX,posY,dir){
 	this.state = NORMAL_STATE;
 	this.height = 16;
 	this.deadCnt = 0;
+	// chapter47
+	this.score = 100;
 }
 
 /*
@@ -58,10 +62,11 @@ Kuribo.prototype.init = function(posX,posY,dir){
 	texture:img class
 	scrollX:X軸のスクロール量
 */
-Kuribo.prototype.draw = function(ctx,texture,scrollX){
+Kuribo.prototype.draw = function(ctx,texture,scoreTex,oneUpTex,scrollX){
 	if(this.state != DEAD){
 		ctx.drawImage(texture, (this.animX * 32) + (this.direction * 128),this.animY,32,32,this.posX - scrollX,this.posY,32,32);
 	}
+	this.drawScore(ctx,scoreTex,oneUpTex,scrollX);
 }
 
 /*
@@ -194,11 +199,14 @@ Kuribo.prototype.collisionWithMario = function(map,mario){
 					}
 					// マリオの下がクリボの中間地点よりも上にある
 					if(mario.posY + mario.height <= this.posY + (32 - this.height) + (this.height / 2)){
+						// マリオが踏みつけた後の処理
+						mario.stompAction();
+						this.score = mario.getScore();
 						// 潰れたアニメーションにする
 						this.state = DEAD_ACTION;
 						this.animY = 64;
 						this.direction = LEFT_DIR;
-						mario.jumpPower = STEP_UP_NUM;
+						
 					}
 				 	else{
 						mario.collisionWithEnemy(map);
@@ -349,4 +357,17 @@ Kuribo.prototype.setDeadCollisionAction = function(){
 	this.state = DEAD_FIRE_ACTION;
 	// 少しジャンプさせる
 	this.addPosY = -8;
+}
+
+/**
+ * スコアを描画する
+ * @param {*} ctx 
+ * @param {*} texture 
+ * @param {*} oneUpTex 
+ * @param {*} scrollX 
+ */
+Kuribo.prototype.drawScore = function(ctx,texture,oneUpTex,scrollX){
+	if(this.state == DEAD_FIRE_ACTION || this.state == DEAD_ACTION){
+		drawEnemyScore(ctx,texture,oneUpTex,this.posX - scrollX,this.posY,this.score);
+	}
 }

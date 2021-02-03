@@ -323,7 +323,9 @@ function drawInStage(){
   // chapter46 timer
   g_Ctx.drawImage(gMapTex,352,480,64,32, 550,0, 64, 32);
   drawNumber(615,32,Math.floor(timer.cnt / 60),0.8,0.8);
-  
+  // chapter47 score
+  drawScore(32,10,gScore);
+
   gMario.draw(g_Ctx,gMarioTex);
   gMario.drawOneUp(g_Ctx,gMapTex);
   for(var i = 0;i < gMario.MAX_FIRE_NUM;++i){
@@ -331,10 +333,10 @@ function drawInStage(){
   }
   
   for(var i = 0;i < gKuribos[gMapStage].length;++i){
-      gKuribos[gMapStage][i].draw(g_Ctx,gKuriboTex,gMario.mapScrollX);
+      gKuribos[gMapStage][i].draw(g_Ctx,gKuriboTex,gCoinTex,gMapTex,gMario.mapScrollX);
   }
   for(var i = 0;i < gNokos[gMapStage].length;++i){
-      gNokos[gMapStage][i].draw(g_Ctx,gNokoTex,gMario.mapScrollX);
+      gNokos[gMapStage][i].draw(g_Ctx,gNokoTex,gCoinTex,gMapTex,gMario.mapScrollX);
   }
   
   // マリオが後ろに描画されるようにここで、土管を描画する
@@ -467,6 +469,32 @@ function drawNumber(posX,posY,coinNum,scaleX = 1,scaleY = 1,fromRight = true){
     numberPosX += (25 * scaleX);
   }
 }
+/**
+ * 10万点まで埋める
+ * @param {*} posX 
+ * @param {*} posY 
+ * @param {*} score 
+ */
+function drawScore(posX,posY,score){
+  let digits = getDigits(score);	// 桁数を取得
+  let maxNumber = getMaxNumber(digits);
+  // 描画位置
+  let numberPosX = posX;
+  let zeroNum = MAX_SCORE_DIGITS - digits;
+  // 満たない部分は0で描画する
+  for(var i = 0;i < zeroNum;++i){
+    g_Ctx.drawImage(gCoinTex,0,0,20,17,numberPosX,posY,20,17);
+    numberPosX += 25;
+  }
+  while(maxNumber >= 1){
+    // 一番上の桁数から描画する
+    g_Ctx.drawImage(gCoinTex, Math.floor((score / maxNumber )) * 20,0,20,17, numberPosX,posY, 20, 17);
+    score -= Math.floor((score / maxNumber)) * maxNumber;				// 一番上の桁数を引く(111だったら100を引く)
+    maxNumber = Math.floor(maxNumber / 10);		// 111 = 11にする
+    numberPosX += 25;
+  }
+}
+
 
 /**
   アイテムブロックから出現したコインの描画

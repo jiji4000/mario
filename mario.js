@@ -94,6 +94,9 @@ function Mario(posX,posY){
 	// one upを表示するタイマー
 	this.oneUpCnt = 0;
 	this.isDrawOneUp = false;
+	// chapter47
+	// 連続踏みつけ数
+	this.sequenceJumpCnt = 0;
 }
 
 /**
@@ -448,6 +451,8 @@ Mario.prototype.collisionY = function(map,posY){
 			this.isJump = false;
 			// リセットアニメーション
 			this.animOffsetX = 0;
+			// chapter47 地面についたら連続ジャンプのカウントをゼロにする
+			this.sequenceJumpCnt = 0;
 			return true;
 		}
 	}
@@ -504,6 +509,8 @@ Mario.prototype.animateBlockCoin = function(){
 */
 Mario.prototype.getCoin = function(){
   // コインを100枚とったら1upさせる
+  // スコア上昇
+  gScore += COIN_SCORE;
   if(++this.coinNum >= 100){
     this.coinNum = 0;
     this.playerNum++;
@@ -590,6 +597,7 @@ Mario.prototype.getKinoko = function(){
 	this.posY -= MAP_SIZE;
 	this.textureOffsetY = 128;
 	this.textureHeight = MAP_SIZE * 2;
+	gScore += KINOKO_SCORE;
 }
 
 /**
@@ -599,6 +607,7 @@ Mario.prototype.getFireKinoko = function(){
 	this.state = FIRE_STATE;
 	this.textureOffsetY = 384;
 	this.textureHeight = MAP_SIZE * 2;
+	gScore += FIRE_SCORE;
 }
 
 /**
@@ -1219,4 +1228,30 @@ Mario.prototype.timeOut = function(){
 Mario.prototype.setDeadParam = function(){
 	this.state = DEAD_ACTION;
 	this.addPosY = 14;
+}
+
+/**
+ * chapter47
+ * 踏みつけ数に応じたスコアを返す
+ * 100 200 400 800 1000 2000 4000 8000
+ */
+Mario.prototype.getScore = function(){
+	return STOMPING_SCORES[this.sequenceJumpCnt];
+}
+
+/**
+ * chapter47
+ * 踏みつけ後の処理
+ * 上昇させる、スコアカウントを上げる
+ */
+Mario.prototype.stompAction = function(){
+	this.jumpPower = STEP_UP_NUM;
+	if(++this.sequenceJumpCnt >= STOMPING_SCORES.length - 1){
+		this.sequenceJumpCnt = STOMPING_SCORES.length - 1;
+		// one up
+		this.playerNum++;
+	}else{
+		// 1upでなかったら、スコアに加算する
+		gScore += this.getScore();
+	}
 }

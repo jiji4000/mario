@@ -83,4 +83,10 @@ let ONE_UP_CNT = 80;
 // chapter46
 // 各々のステージごとに決められた制限時間
 let STAGE_TIMES = [(60 * 60 * 3),];
-
+// chapter47
+let MAX_SCORE_DIGITS = 6;
+let MAX_SCORE = 999999;
+let STOMPING_SCORES = [0,100,200,400,800,1000,2000,4000,8000,10000];
+let COIN_SCORE = 100;
+let KINOKO_SCORE = 1000;
+let FIRE_SCORE = 2000;
