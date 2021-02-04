@@ -27,3 +27,33 @@ function getMaxNumber(digits){
   }
   return maxNum;
 }
+
+/**
+ * 敵用のスコア描画処理
+ * @param {*} ctx 
+ * @param {*} texture 
+ * @param {*} oneUpTex 
+ * @param {*} posX 
+ * @param {*} posY 
+ * @param {*} score 
+ */
+function drawEnemyScore(ctx,texture,oneUpTex,posX,posY,score){
+	// 8000点超えていれば1up
+	if(score > 8000){
+			ctx.drawImage(oneUpTex,416,480,64,32,(posX + 16) - (64 / 2),posY - 14,64,32);
+	}
+	else{
+			var digits = getDigits(score);	// 桁数を取得
+			var maxNumber = getMaxNumber(digits);
+			// 3桁4桁で分ける
+			var numberPosX = digits == 3 ? (posX + 16) - (18 / 2) - 18 : (posX + 16 - 9) - 28;
+			// 全て描画するまで
+			while(maxNumber >= 1){
+				// 一番上の桁数から描画する
+				g_Ctx.drawImage(gCoinTex, Math.floor((score / maxNumber )) * 20,0,20,17, numberPosX,posY - 4, 16, 13);
+				score -= Math.floor((score / maxNumber)) * maxNumber;				// 一番上の桁数を引く(111だったら100を引く)
+				maxNumber = Math.floor(maxNumber / 10);		// 111 = 11にする
+				numberPosX += 18;
+			}        
+	}
+}
