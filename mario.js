@@ -178,6 +178,8 @@ Mario.prototype.init = function(posX,posY){
 	this.textureHeight = MAP_SIZE;			// テクスチャを切り取る範囲Y
 	// chapter44
 	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面に遷移するのタイマー時間
+	// 連続踏みつけ数
+	this.sequenceJumpCnt = 0;
 }
 
 /*
