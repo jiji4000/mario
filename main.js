@@ -320,12 +320,6 @@ function drawInStage(){
       break;
   }
 
-  // chapter46 timer
-  g_Ctx.drawImage(gMapTex,352,480,64,32, 550,0, 64, 32);
-  drawNumber(615,32,Math.floor(timer.cnt / 60),0.8,0.8);
-  // chapter47 score
-  drawScore(32,10,gScore);
-
   gMario.draw(g_Ctx,gMarioTex);
   gMario.drawOneUp(g_Ctx,gMapTex);
   for(var i = 0;i < gMario.MAX_FIRE_NUM;++i){
@@ -343,6 +337,12 @@ function drawInStage(){
   for(var i = 0;i < gDocanObjs[gMapStage].length;++i){
     gDocanObjs[gMapStage][i].draw(g_Ctx,gMapTex,gMario.mapScrollX);
   }
+
+  // chapter46 timer
+  g_Ctx.drawImage(gMapTex,352,480,64,32, 550,0, 64, 32);
+  drawNumber(615,32,Math.floor(timer.cnt / 60),0.8,0.8);
+  // chapter47 score
+  drawScore(32,10,gScore);
   
   // コイン
   g_Ctx.drawImage(gMapTex,32,64,32,32,280,8,22,22);
