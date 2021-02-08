@@ -97,6 +97,13 @@ function Mario(posX,posY){
 	// chapter47
 	// 連続踏みつけ数
 	this.sequenceJumpCnt = 0;
+	// chapter48
+	// 無敵フラグ
+	this.isInvincible = false;
+	this.invincibleCnt = 0;
+	// 小さくなるアニメーションフラグ
+	this.onSmallAnimation = false;
+	this.smallAnimationCnt = 0;
 }
 
 /**
@@ -180,6 +187,12 @@ Mario.prototype.init = function(posX,posY){
 	this.continueCnt = 0;			// マリオが死んでからコンテニュー画面に遷移するのタイマー時間
 	// 連続踏みつけ数
 	this.sequenceJumpCnt = 0;
+	// 無敵フラグ
+	this.isInvincible = false;
+	this.invincibleCnt = 0;
+	// 小さくなるアニメーションフラグ
+	this.onSmallAnimation = false;
+	this.smallAnimationCnt = 0;
 }
 
 /*
@@ -548,7 +561,27 @@ Mario.prototype.doMapScrollX = function(){
 	敵と当たった時のアクション
 */
 Mario.prototype.collisionWithEnemy = function(){
-	this.setDeadParam();
+	// 無敵状態の時は実行しない
+	if(!this.isInvincible){
+		// でかい状態なら一回もつ
+		if(this.isBig()){
+			// 小さくする
+			this.height = MAP_SIZE;
+			this.textureHeight = MAP_SIZE;
+			this.textureOffsetY = 0;
+			this.posY += MAP_SIZE;
+			this.updateMapPositionY(this.posY);
+			this.state = NORMAL_STATE;
+			this.isInvincible = true;
+			this.onSmallAnimation = true;
+			this.keyDisable = true;
+			// 全体の動きを止めるフラグ
+			gActionStop = true;
+		}
+		else{
+			this.setDeadParam();
+		}
+	}
 }
 
 /**
@@ -678,7 +711,7 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 			}
 		}
 		// ジャンプ処理
-		if(!this.isMapMove){
+		if(!this.isMapMove && !gActionStop){
 			this.jumpAction(gUpPush,mapChip);
 		}
 		// マップチップアイテムオブジェクトとの当たり判定
@@ -698,6 +731,10 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 		this.doMapScrollX();
 		// star処理
 		this.starAction();
+		// 無敵処理
+		this.invincibleAction();
+		// 小さくする処理
+		this.smallAnimationAction();
 		// one up動作
 		this.oneUpAction();
 	}
@@ -1255,5 +1292,59 @@ Mario.prototype.stompAction = function(){
 	}else{
 		// 1upでなかったら、スコアに加算する
 		gScore += this.getScore();
+	}
+}
+
+/**
+ * chapter48
+ * 
+ * 無敵アニメーション処理
+ */
+Mario.prototype.invincibleAction = function(){
+	// 小さくなるアニメーションが終わった後に発動する
+	if(this.isInvincible && !this.onSmallAnimation){
+		if(this.invincibleCnt++ >= INVINCIBLE_TIME){
+			this.isInvincible = false;
+			this.invincibleCnt = 0;
+		}
+		// アニメーションさせる
+		if(this.invincibleCnt % 4 == 0){
+			this.starOffsetX = this.starOffsetX == 0 ? 256 : 0;
+		}
+	}
+}
+
+/**
+ * chapter48
+ * 
+ * 小さくなる際の処理
+ * 小さくなったり大きくなったり
+ */
+Mario.prototype.smallAnimationAction = function(){
+	if(this.onSmallAnimation){
+		this.smallAnimationCnt++;
+		if(this.smallAnimationCnt % 5 == 0){
+			if(this.height == MAP_SIZE){
+				// デカくする
+				this.height = MAP_SIZE * 2;
+				this.posY -= MAP_SIZE;
+				this.textureOffsetY = 128;
+				this.textureHeight = MAP_SIZE * 2;	
+			}
+			else{
+				// 小さくする
+				this.height = MAP_SIZE;
+				this.textureHeight = MAP_SIZE;
+				this.textureOffsetY = 0;
+				this.posY += MAP_SIZE;
+			}
+		}
+		if(this.smallAnimationCnt >= 20){
+			// 小さくするアニメーション終了
+			this.onSmallAnimation = false;
+			gActionStop = false;
+			this.keyDisable = false;
+			this.smallAnimationCnt = 0;
+		}
 	}
 }

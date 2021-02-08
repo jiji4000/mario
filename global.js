@@ -7,3 +7,6 @@ let gWorldNumber = 1;
 let gSubWorldNumber = 1;
 // chapter47
 let gScore = 0;
+// chapter48
+// 時間を止めるフラグ
+let gActionStop = false;
