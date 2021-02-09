@@ -1306,6 +1306,7 @@ Mario.prototype.invincibleAction = function(){
 		if(this.invincibleCnt++ >= INVINCIBLE_TIME){
 			this.isInvincible = false;
 			this.invincibleCnt = 0;
+			this.starOffsetX = 0;
 		}
 		// アニメーションさせる
 		if(this.invincibleCnt % 4 == 0){
