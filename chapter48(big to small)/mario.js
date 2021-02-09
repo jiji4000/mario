@@ -1309,7 +1309,7 @@ Mario.prototype.invincibleAction = function(){
 			this.starOffsetX = 0;
 		}
 		// アニメーションさせる
-		if(this.invincibleCnt % 4 == 0){
+		else if(this.invincibleCnt % 4 == 0){
 			this.starOffsetX = this.starOffsetX == 0 ? 256 : 0;
 		}
 	}
