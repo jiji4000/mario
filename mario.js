@@ -761,7 +761,7 @@ Mario.prototype.blockAction = function(mapIndexX,mapIndexY,isUp,map){
 	this.blockAttackIndexX[this.blockAttackIndex] = mapIndexX;
 	this.blockAttackIndexY[this.blockAttackIndex] = mapIndexY;
 	// 小さいかつ上昇フラグが立っている場合は破壊できないので、上昇させる
-	if(this.state == NORMAL_STATE || isUp)
+	if(this.state == NORMAL_STATE && !isUp)
 	{
 		this.isBlockUp[this.blockAttackIndex] = true;	// 上昇フラグon
 		this.blockUpX[this.blockAttackIndex] = mapIndexX * MAP_SIZE;
@@ -807,7 +807,7 @@ Mario.prototype.animateBlock = function(map){
 			this.blockAttackX[i][2] += 4;
 			this.blockAttackX[i][3] = this.blockAttackX[i][2];
 			// ブロックが画面外に出たらアニメーションを停止する
-			if(this.blockAttackY[i][3] <= -32){
+			if(this.blockAttackY[i][3] >= 512){
 				this.isBlockAttack[i] = false;
 			}
 		}
