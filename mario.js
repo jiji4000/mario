@@ -104,6 +104,10 @@ function Mario(posX,posY){
 	// 小さくなるアニメーションフラグ
 	this.onSmallAnimation = false;
 	this.smallAnimationCnt = 0;
+	// chapter49
+	// 隠しブロックの出現セーブ用
+	this.hideBlockX = -1;
+	this.hideBlockY = -1;
 }
 
 /**
@@ -442,7 +446,6 @@ Mario.prototype.collisionY = function(map,posY){
 					// ボックスを空にする
 					replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
 				}
-
 				// (加算される前の)中心点からの距離をみる
 				var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
 				// Yの加算量調整
@@ -451,6 +454,36 @@ Mario.prototype.collisionY = function(map,posY){
 				this.jumpPower = 0;
 				return true;
 			}
+			// 隠しブロックだった場合
+			else if(isHideBlock(map[this.upMapY][mapsX[i]])){
+				// ブロックの下半分かつマリオが上昇中のみ隠しブロックを出現させる
+				if(this.addPosY > 0){
+					// 半分以下なら隠しブロックを出現させる
+					let blockPosY = (this.upMapY * MAP_SIZE) - HALF_MAP_SIZE;
+					// マリオの頭上が隠しブロックブロックの半分の位置以下
+					if(posY - 32 > blockPosY){
+						// 隠し1up block
+						if((map[this.upMapY][mapsX[i]])){
+							// 1up kinokoを出現させる
+							let posX = mapsX[i] * MAP_SIZE;
+							let posY = this.upMapY * MAP_SIZE;
+							this.oneUpKinoko.activate(posX,posY,LEFT_DIR);
+							// ボックスを空にする
+							replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
+							// 隠しブロックが出現しないように状態を保存する。
+							this.hideBlockX = mapsX[i];
+							this.hideBlockY = this.upMapY;
+						}
+						// (加算される前の)中心点からの距離をみる
+						var vecY = Math.abs((this.posY + HALF_MAP_SIZE) - ((this.upMapY * MAP_SIZE) + HALF_MAP_SIZE));
+						// Yの加算量調整
+						this.addPosY = Math.abs(MAP_SIZE - vecY);
+						// 落下させる
+						this.jumpPower = 0;
+						return true;
+					}
+				}
+			}			
 		}
 		// マリオの下側
 		if(isObjectMap(map[this.downMapY][this.rightMapX]) || isObjectMap(map[this.downMapY][this.leftMapX])){

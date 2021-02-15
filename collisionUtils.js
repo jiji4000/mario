@@ -103,3 +103,25 @@ function isOneUpBlock(mapNumber){
 	}
 	return false;
 }
+
+/**
+ * 隠しブロック判定
+ * @param {*} mapNumber 
+ */
+function isHideBlock(mapNumber){
+	if(mapNumber >= 192 && mapNumber <= 192){
+		return true;
+	}
+	return false;
+}
+
+/**
+ * 隠しブロック1up判定
+ * @param {*} mapNumber 
+ */
+function isHideOneUpBlock(mapNumber){
+	if(mapNumber == 192){
+		return true;
+	}
+	return false;
+}
