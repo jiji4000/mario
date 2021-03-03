@@ -5,12 +5,24 @@ function Timer(time){
 /**
  * timer update
  * 
+ * isStop:時間を止めるフラグ
+ * state:マリオのゴールアニメーション状態
+ * 
  * 時間切れ:trueを返す
  */
-Timer.prototype.update = function(){
-	if(this.cnt == 0){
-        return true;
+Timer.prototype.update = function(state){
+    switch(state){
+        case NONE_ANIMATION:
+            this.cnt--;        
+            break;
+        case GOAL_ANIMATION_TIME_CNT:
+            this.cnt -= 60;
+            gScore += 50;
+            break;
     }
-    this.cnt--;
+    if(this.cnt <= 0){
+        this.cnt = 0;
+        return true;           
+    }
     return false;
 }

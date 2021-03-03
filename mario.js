@@ -108,6 +108,13 @@ function Mario(posX,posY){
 	// 隠しブロックの出現セーブ用
 	this.hideBlockX = -1;
 	this.hideBlockY = -1;
+	// chapter50
+	// ゴールアニメーション状態を管理する	
+	this.goalAnimationState = INACTIVE;
+	// 重力など行動を止めるフラグ
+	this.isMarioStop = false;
+	// ゴールの位置
+	this.goalPosX = 36 * 32;
 }
 
 /**
@@ -197,6 +204,11 @@ Mario.prototype.init = function(posX,posY){
 	// 小さくなるアニメーションフラグ
 	this.onSmallAnimation = false;
 	this.smallAnimationCnt = 0;
+	// chapter50
+	this.isGoalAnimation = false;
+	// 重力など行動を止めるフラグ
+	this.isMarioStop = false;
+	this.goalPosX = 32 * 36;
 }
 
 /*
@@ -205,8 +217,10 @@ Mario.prototype.init = function(posX,posY){
 	texture:img class
 */
 Mario.prototype.draw = function(ctx,texture){
-	let offsetY = this.isSit ? (29 + 64) : 0;
-	ctx.drawImage(texture,this.starOffsetX + (this.animX * 32) + this.animOffsetX,((this.direction * 2) * this.textureHeight) + this.textureOffsetY + offsetY,32,this.height,this.posX,this.posY,32,this.height);
+	if(this.isDraw()){
+		let offsetY = this.isSit ? (29 + 64) : 0;
+		ctx.drawImage(texture,this.starOffsetX + (this.animX * 32) + this.animOffsetX,((this.direction * 2) * this.textureHeight) + this.textureOffsetY + offsetY,32,this.height,this.posX,this.posY,32,this.height);		
+	}
 }
 
 Mario.prototype.moveX = function(mapChip,moveX){
@@ -744,7 +758,7 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 			}
 		}
 		// ジャンプ処理
-		if(!this.isMapMove && !gActionStop){
+		if(!this.isMapMove && !this.stop()){
 			this.jumpAction(gUpPush,mapChip);
 		}
 		// マップチップアイテムオブジェクトとの当たり判定
@@ -770,6 +784,8 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 		this.smallAnimationAction();
 		// one up動作
 		this.oneUpAction();
+		// ゴールアニメーション
+		this.goalAnimationAction(mapChip);
 	}
 	// update fire
 	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
@@ -1289,8 +1305,16 @@ Mario.prototype.drawOneUp = function(ctx,texture){
  * マリオ時間切れ時の処理
  */
 Mario.prototype.timeOut = function(){
-	if(!this.isDead()){
-		this.setDeadParam();
+	switch(this.goalAnimationState){
+		case NONE_ANIMATION:
+			if(!this.isDead()){
+				this.setDeadParam();
+			}
+			break;
+		case GOAL_ANIMATION_TIME_CNT:
+			// 終わり状態に遷移させる
+			this.goalAnimationState = GOAL_ANIMATION_END;
+			break;
 	}
 }
 
@@ -1382,3 +1406,71 @@ Mario.prototype.smallAnimationAction = function(){
 		}
 	}
 }
+
+/**
+ * ゴールアニメーション状態のセット
+ * @param {*} posX 
+ */
+Mario.prototype.setGoalAnimation = function(posX){
+	// 位置を修正
+	this.moveNumX = posX;
+	this.goalAnimationState = GOAL_ANIMATION_DOWN;
+	this.isMarioStop = true;
+	this.keyDisable = true;
+	gTimeStop = true;
+}
+
+/**
+ * chapter50
+ * マリオの動けないか判定
+ */
+Mario.prototype.stop = function(){
+	return this.isMarioStop || gActionStop;
+}
+
+/**
+ * ゴールアニメーション用関数
+ */
+Mario.prototype.goalAnimationAction = function(mapChip){
+	switch(this.goalAnimationState){
+		// マリオを下までおろす処理
+		case GOAL_ANIMATION_DOWN:
+			this.posY += 4;
+			// 一番下まで降りたら歩かせる
+			if(this.posY + this.height >= 384){
+				this.goalAnimationState = GOAL_ANIMATION_WALK;
+				this.posY = 384 - this.height;
+				// 重力を有効にする
+				this.isMarioStop = false;
+			}
+			break;
+			// マリオがゴールに向かって歩く
+		case GOAL_ANIMATION_WALK:
+			this.updateMapPosition();
+			this.moveX(mapChip,NORMAL_SPPED);
+			if(this.moveNumX >= this.goalPosX){
+				this.goalAnimationState = GOAL_ANIMATION_TIME_CNT;
+			}
+			break;
+			// 時間をスコアに変えている段階
+		case GOAL_ANIMATION_TIME_CNT:
+			// 
+			break;
+			// カウントが終了した状態
+		case GOAL_ANIMATION_END:
+			break;
+	}
+}
+
+/**
+ * マリオを描画するか判定
+ * 
+ * クリアして、次ステージに入ったあとは描画しない。
+ */
+Mario.prototype.isDraw = function(){
+	if(this.goalAnimationState >= 4){
+		return false;
+	}
+	return true;
+}
+
