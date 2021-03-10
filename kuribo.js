@@ -29,8 +29,9 @@ function Kuribo(posX,posY,dir){
  * @param {*} posX 
  * @param {*} posY 
  * @param {*} dir 
+ * @param {*} state 
  */
-Kuribo.prototype.init = function(posX,posY,dir){
+Kuribo.prototype.init = function(posX,posY,dir,state = NORMAL_STATE){
 	this.posX = posX;
 	this.posY = posY;
 	// chapter25敵の移動
@@ -49,7 +50,7 @@ Kuribo.prototype.init = function(posX,posY,dir){
 	this.upMapY = 0;
 	this.downMapY = 0;
 	// chapter27
-	this.state = NORMAL_STATE;
+	this.state = state;
 	this.height = 16;
 	this.deadCnt = 0;
 	// chapter47

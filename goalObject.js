@@ -7,6 +7,17 @@ function Goal(posX){
     this.castleFlagY = 273;
 }
 
+/**
+ * 初期化
+ * @param {*} posX 
+ */
+Goal.prototype.init = function(posX){
+    this.posX = posX;
+    this.flagY = 64;
+    this.score = 0;
+    this.castleFlagY = 273;
+}
+
 /*
 	描画関数
 	ctx:context
@@ -83,7 +94,7 @@ Goal.prototype.fragAnimation = function(mario){
             this.flagY += 3;    
         }
         else{
-            this.flag = 384;
+            this.flagY = 358;
         }
     }
 }

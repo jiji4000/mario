@@ -13,12 +13,15 @@ var gNokoTex;
 
 var gMario;
 let gKuribos = [
-  //[new Kuribo(1024,384,LEFT_DIR),new Kuribo(1088,384,LEFT_DIR)],
+  [new Kuribo(1024,384,LEFT_DIR),new Kuribo(1088,384,LEFT_DIR)],
+  //[new Kuribo(128,384,LEFT_DIR),new Kuribo(192,384,LEFT_DIR),new Kuribo(256,384,LEFT_DIR),new Kuribo(320,384,LEFT_DIR),new Kuribo(384,384,LEFT_DIR),new Kuribo(448,384,LEFT_DIR),new Kuribo(512,384,LEFT_DIR),new Kuribo(576,384,LEFT_DIR),new Kuribo(640,384,LEFT_DIR),],
   []
 ];
 
 let gNokos = [
-  //[new Noko(384,396,RIGHT_DIR),new Noko(192,396,LEFT_DIR)],
+  [new Noko(384,396,RIGHT_DIR),new Noko(192,396,LEFT_DIR)],
+  //[new Noko(1200,396,RIGHT_DIR),new Noko(1800,396,LEFT_DIR)],
+  //[new Noko(128,384,LEFT_DIR),new Noko(192,384,LEFT_DIR),new Noko(256,384,LEFT_DIR),new Noko(320,384,LEFT_DIR),new Noko(384,384,LEFT_DIR),new Noko(448,384,LEFT_DIR),new Noko(512,384,LEFT_DIR),new Noko(576,384,LEFT_DIR),new Noko(640,384,LEFT_DIR),],
   []
 ];
 
@@ -122,14 +125,16 @@ let gBonusBackMapChip = [
 
 // マップによって変化できるように配列で持つ
 let gDocans = [
-  [new Docan(384,320,64,64,MAP_TWO,gBonusMapChip[0].length,DOCAN_DOWN,DOCAN_DOWN,48,64)],
-  [new Docan(576,384,64,64,MAP_ONE,gMapChip[0].length,DOCAN_RIGHT,DOCAN_UP,2768,320)]
+  [],
+  //[new Docan(384,320,64,64,MAP_TWO,gBonusMapChip[0].length,DOCAN_DOWN,DOCAN_DOWN,48,64)],
+  //[new Docan(576,384,64,64,MAP_ONE,gMapChip[0].length,DOCAN_RIGHT,DOCAN_UP,2768,320)]
 ];
 
 // マップによって変化できるように配列で持つ
 let gDocanObjs = [
-  [new DocanObj(384,352,DOCAN_UP),new DocanObj(2752,352,DOCAN_UP)],
-  [new DocanObj(32,0,DOCAN_DOWN),new DocanObj(576,384,DOCAN_LEFT)]
+  [],
+  // [new DocanObj(384,352,DOCAN_UP),new DocanObj(2752,352,DOCAN_UP)],
+  // [new DocanObj(32,0,DOCAN_DOWN),new DocanObj(576,384,DOCAN_LEFT)]
 ];
 
 // chapter46
@@ -277,6 +282,18 @@ window.requestNextAnimationFrame =
  * ステージ1の敵の初期化
  */
 function initStage1Enemy(){
+  // kuribo
+  gKuribos[0][0].init(1024,384,LEFT_DIR);
+  gKuribos[0][1].init(1088,384,LEFT_DIR);
+  // nokonoko
+  gNokos[0][0].init(384,396,RIGHT_DIR);
+  gNokos[0][1].init(192,396,LEFT_DIR);
+}
+
+/**
+ * ステージ2の敵の初期化
+ */
+function initStage2Enemy(){
   // kuribo
   gKuribos[0][0].init(1024,384,LEFT_DIR);
   gKuribos[0][1].init(1088,384,LEFT_DIR);
@@ -624,6 +641,10 @@ function initStage(){
     case 1:
       initStage1();
       break;
+    case 2:
+      initStage2();
+      break;
+
   }
   initStageTimes(gTotalStageNumber);
 }
@@ -642,6 +663,26 @@ function initStage1(){
   gMapChip = JSON.parse(JSON.stringify(gMapChipCopy));
   gBonusMapChip = JSON.parse(JSON.stringify(gBonusMapChipCopy));
   gMario.init(0,384);
+}
+
+/**
+ * stage2用の初期化
+ */
+function initStage2(){
+  // 敵の初期化
+  initStage2Enemy();
+  // 隠しブロックの出現を保存する
+  if(gMario.hideBlockX != -1){
+    replaceEmptyBoxMap(gMapChipCopy,gMario.hideBlockX,gMario.hideBlockY);
+  }
+  // マップ初期化
+  gMapChip = JSON.parse(JSON.stringify(gMap12));
+  gBackGroundMapChip = JSON.parse(JSON.stringify(gBackGroundMapChip12));
+  gMario.init(0,384);
+  
+  // ゴール
+  gGoal.init(91 * MAP_SIZE);
+  gMario.setGoalPosition(91 * MAP_SIZE);
 }
 
 /**

@@ -54,7 +54,7 @@ function Noko(posX,posY,dir){
  * @param {*} posY 
  * @param {*} dir 
  */
-Noko.prototype.init = function(posX,posY,dir){
+Noko.prototype.init = function(posX,posY,dir,state = NORMAL_STATE){
 	// 変数
 	this.posX = posX;
 	this.posY = posY;
@@ -69,7 +69,7 @@ Noko.prototype.init = function(posX,posY,dir){
 	this.upMapY = 0;
 	this.downMapY = 0;
 	// chapter27
-	this.state = NORMAL_STATE;
+	this.state = state;
 	this.height = this.NORMAL_HEIGHT;
 	this.deadCnt = 0;
 	// 甲羅状態の移動量

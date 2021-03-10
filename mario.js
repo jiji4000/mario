@@ -114,7 +114,10 @@ function Mario(posX,posY){
 	// 重力など行動を止めるフラグ
 	this.isMarioStop = false;
 	// ゴールの位置
-	this.goalPosX = 36 * 32;
+	this.goalPosX = 36 * 32;	
+	// chapter51
+	// ゴールアニメーションのためのタイマー
+	this.goalCnt = 0
 }
 
 /**
@@ -205,10 +208,14 @@ Mario.prototype.init = function(posX,posY){
 	this.onSmallAnimation = false;
 	this.smallAnimationCnt = 0;
 	// chapter50
-	this.isGoalAnimation = false;
+	// ゴールアニメーション状態を管理する	
+	this.goalAnimationState = INACTIVE;
 	// 重力など行動を止めるフラグ
 	this.isMarioStop = false;
 	this.goalPosX = 32 * 36;
+
+	// chapter51
+	this.goalCnt = 0
 }
 
 /*
@@ -1458,6 +1465,9 @@ Mario.prototype.goalAnimationAction = function(mapChip){
 			break;
 			// カウントが終了した状態
 		case GOAL_ANIMATION_END:
+			if(this.goalCnt++ >= GOAL_WAIT_CNT){
+				this.moveNextStage();
+			}
 			break;
 	}
 }
@@ -1472,5 +1482,24 @@ Mario.prototype.isDraw = function(){
 		return false;
 	}
 	return true;
+}
+
+/**
+ * ステージクリア時に次のステージに遷移させる
+ */
+Mario.prototype.moveNextStage = function(){
+	// とりあえず、これでいい
+	gTotalStageNumber++;
+	gSubWorldNumber++;
+	// ステージ切り替え画面に遷移させる
+	gState = PRE_STAGE;
+}
+
+/**
+ * マリオがゴールで消える位置を代入する
+ * @param {*} goalPosX 
+ */
+Mario.prototype.setGoalPosition = function(goalPosX){
+	this.goalPosX = goalPosX + (MAP_SIZE * 6);
 }
 

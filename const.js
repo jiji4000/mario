@@ -82,7 +82,7 @@ let ONE_UP_CNT = 80;
 
 // chapter46
 // 各々のステージごとに決められた制限時間
-let STAGE_TIMES = [(60 * 60 * 3),];
+let STAGE_TIMES = [(60 * 60 * 4),(60 * 60 * 4)];
 // chapter47
 let MAX_SCORE_DIGITS = 6;
 let MAX_SCORE = 999999;
@@ -100,3 +100,6 @@ let GOAL_ANIMATION_DOWN = 2;
 let GOAL_ANIMATION_WALK = 3;
 let GOAL_ANIMATION_TIME_CNT = 4;
 let GOAL_ANIMATION_END = 5;
+
+// chapter51
+let GOAL_WAIT_CNT = 180;
