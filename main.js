@@ -10,6 +10,8 @@ var gKuriboTex;
 var gCoinTex;
 // chapter40
 var gNokoTex;
+// chapter52
+let gTitleTex;
 
 var gMario;
 let gKuribos = [
@@ -46,6 +48,24 @@ var RIGHT_KEY = 39;
 var UP_KEY = 38;
 var DOWN_KEY = 40;
 var A_KEY = 65;
+
+let gTitleMapChip = [
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [112,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,113,114],
+  [128,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,129,130]
+];
 
 let gMapChip = [
 [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
@@ -162,7 +182,7 @@ onload = function () {
     g_Ctx = g_Canvas.getContext('2d');          // ctx
     loadTexture();
     // mario
-    gMario = new Mario(0,384);
+    gMario = new Mario(32,384);
     // キーの登録
     window.addEventListener('keydown', keyDown, true);
     window.addEventListener('keyup', keyUp, true);
@@ -183,6 +203,8 @@ function loadTexture(){
   gCoinTex.src = "resource/white_number.png";
   gNokoTex = new Image();
   gNokoTex.src = "resource/nokonoko.png";
+  gTitleTex = new Image();
+  gTitleTex.src = "resource/title.png"; 
 }
 
 function animate(now) {
@@ -308,6 +330,9 @@ function initStage2Enemy(){
 */
 function Draw(){
   switch(gState){
+    case TITLE:
+      drawTitle();
+      break;
     case IN_STAGE:
       drawInStage();
       break;
@@ -362,20 +387,10 @@ function drawInStage(){
   for(var i = 0;i < gDocanObjs[gMapStage].length;++i){
     gDocanObjs[gMapStage][i].draw(g_Ctx,gMapTex,gMario.mapScrollX);
   }
+  
+  // オプション描画
+  drawOption();
 
-  // chapter46 timer
-  g_Ctx.drawImage(gMapTex,352,480,64,32, 550,0, 64, 32);
-  drawNumber(615,32,Math.floor(timer.cnt / 60),0.8,0.8);
-  // chapter47 score
-  drawScore(32,10,gScore);
-  
-  // コイン
-  g_Ctx.drawImage(gMapTex,32,64,32,32,280,8,22,22);
-  // ×
-  g_Ctx.drawImage(gMapTex,320,480,32,32,311,8,22,22);
-  // コイン数
-  drawNumber(343,10,gMario.coinNum,1,1,false);
-  
   drawBlockCoin();
   // chapter37
   drawBlock();
@@ -389,6 +404,24 @@ function drawInStage(){
   gMario.star.draw(g_Ctx,gMapTex,gMario.mapScrollX);
   // chapter45
   gMario.oneUpKinoko.draw(g_Ctx,gMapTex,gMario.mapScrollX);
+}
+
+/**
+ * 上に表示されるコインやスコアなどの描画
+ */
+function drawOption(){
+  // chapter46 timer
+  g_Ctx.drawImage(gMapTex,352,480,64,32, 550,0, 64, 32);
+  drawNumber(615,32,Math.floor(timer.cnt / 60),0.8,0.8);
+  // chapter47 score
+  drawScore(32,10,gScore);
+  
+  // コイン
+  g_Ctx.drawImage(gMapTex,32,64,32,32,280,8,22,22);
+  // ×
+  g_Ctx.drawImage(gMapTex,320,480,32,32,311,8,22,22);
+  // コイン数
+  drawNumber(343,10,gMario.coinNum,1,1,false);
 }
 
 /**
@@ -427,6 +460,22 @@ function drawGameOver(){
   g_Ctx.textAlign = "center";
   // GAMEOVER
   g_Ctx.fillText("GAME OVER", 320, 240);
+}
+
+/**
+ * タイトル画面の描画
+ */
+function drawTitle(){
+  // title用のマップ
+  drawMap(gTitleMapChip);
+  // オプション
+  drawOption();
+  // タイトルロゴ
+  g_Ctx.drawImage(gTitleTex,0,0,420,169,(DISPLAY_WIDTH / 2) - (420 / 2) ,40,420,169);
+  // push space 170 width:275,height:35
+  g_Ctx.drawImage(gTitleTex,0,170,275,35,(DISPLAY_WIDTH / 2) - (275 / 2) ,286,275,35);
+  // mario
+  gMario.draw(g_Ctx,gMarioTex);
 }
 
 /**
@@ -584,6 +633,9 @@ function isAnimationMap(mapIndex){
 
 function move(){
   switch(gState){
+    case TITLE:
+      titleUpdate();
+      break;
     case PRE_STAGE:
       movePreStage();
       break;
@@ -594,6 +646,20 @@ function move(){
       moveInStage();
       break;
   }
+}
+
+/**
+ * タイトル画面のメインループ処理
+ */
+function titleUpdate(){
+  // スペースボタンが押されたら、ステージ遷移画面に移る
+  if(gSpacePush){
+    moveTitleToPreStage();
+  }
+}
+
+function moveTitleToPreStage(){
+  gState = PRE_STAGE;
 }
 
 function moveInStage(){
@@ -697,7 +763,24 @@ function initStageTimes(stageNum){
  * ゲームオーバーからタイトル画面へ移るときの処理
  */
 function moveGameOver(){
+  if(moveStageCnt++ >= GAME_OVER_CNT){
+    resetForTitle();
+    moveStageCnt = 0;
+    gState = TITLE;
+  }
+}
 
+/**
+ * 残機やコインなど一番初期の状態にリセットする
+ */
+function resetForTitle(){
+    gTotalStageNumber = 1;
+    gWorldNumber = 1;
+    gSubWorldNumber = 1;
+    gScore = 0;
+    gMario.init(32,384);
+    gMario.titleReset();
+    initStageTimes(gTotalStageNumber);
 }
 
 function enemyMove(){
@@ -790,4 +873,13 @@ function keyUp(event) {
 	    	gADown = false;
 	    	break;
 	}
+}
+
+/**
+ * canvas click callback
+ */
+function onClickCanvas(){
+  if(gState == TITLE){
+    moveTitleToPreStage();
+  }
 }

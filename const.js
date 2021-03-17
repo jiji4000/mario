@@ -67,7 +67,7 @@ let DOCAN_DOWN = 3;
 // 土管を移動する時の遷移時間frame換算
 let DOCAN_MOVE_TIME = 120;
 // chapter44
-let TITLE = 0
+let TITLE = 0;
 let IN_STAGE = 1;
 let PRE_STAGE = 2;
 let GAME_OVER = 3;
@@ -103,3 +103,7 @@ let GOAL_ANIMATION_END = 5;
 
 // chapter51
 let GOAL_WAIT_CNT = 180;
+
+// chapter52
+let GAME_OVER_CNT = 150;
+let PLAYER_NUM = 3;

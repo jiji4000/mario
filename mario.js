@@ -37,7 +37,7 @@ function Mario(posX,posY){
 	this.height = 32;
 	// chapter30
 	this.coinNum = 0;
-	this.playerNum = 3;
+	this.playerNum = PLAYER_NUM;
 	// chapter33
 	this.isBlockCoinAnim = [false,false];
 	this.blockCoinFrame = [0,0];
@@ -1503,3 +1503,10 @@ Mario.prototype.setGoalPosition = function(goalPosX){
 	this.goalPosX = goalPosX + (MAP_SIZE * 6);
 }
 
+/**
+ * タイトル画面においての初期化
+ */
+Mario.prototype.titleReset = function(){
+	this.playerNum = PLAYER_NUM;
+	this.coinNum = 0;
+}
