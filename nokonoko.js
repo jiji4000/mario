@@ -45,6 +45,8 @@ function Noko(posX,posY,dir){
 	this.scoreCnt = 0;
 	// 連続して甲羅を倒した数
 	this.sequenceAttackCnt = 0;
+	// chapter53
+	this.isStop = true;
 }
 
 /**
@@ -92,6 +94,8 @@ Noko.prototype.init = function(posX,posY,dir,state = NORMAL_STATE){
 	this.scoreCnt = 0;
 	this.isDrawScore = false;
 	this.sequenceAttackCnt = 0;
+	// chapter53
+	this.isStop = true;
 }
 
 /*
@@ -128,31 +132,33 @@ Noko.prototype.drawBlock = function(ctx,texture,scrollX){
 	moveNum:移動量
 */
 Noko.prototype.move = function(mapChip,moveNum,mario){
-	this.updateMapPosition();
-	// 通常時と甲羅攻撃時のみ動かす
-	if(this.state == NORMAL_STATE || this.state == NOKO_ATTACK_STATE){
-		var speed = this.state == NORMAL_STATE ? moveNum : this.ATTACK_MOVE_X;
-		// 向きにより加算量を調整する
-		moveNum = this.direction == LEFT_DIR ? -speed : speed;
-		// 加算量を代入する
-		this.addPosX = moveNum;
-		// x軸との当たり判定
-		this.collisionX(mapChip,this.posX + this.addPosX,mario);
-		this.posX += this.addPosX;
-		// 移動したのでマップ座標更新
-		this.updateMapPositionX(this.posX);
-	}
-	
-	// animation
-	if(this.animCnt++ >= 12){
-		this.animCnt = 0;
-		// 一定以上に達したらアニメーションを更新する
-		if(++this.animX > 3){
-			this.animX = 0;
+	if(!this.isStop){
+		this.updateMapPosition();
+		// 通常時と甲羅攻撃時のみ動かす
+		if(this.state == NORMAL_STATE || this.state == NOKO_ATTACK_STATE){
+			var speed = this.state == NORMAL_STATE ? moveNum : this.ATTACK_MOVE_X;
+			// 向きにより加算量を調整する
+			moveNum = this.direction == LEFT_DIR ? -speed : speed;
+			// 加算量を代入する
+			this.addPosX = moveNum;
+			// x軸との当たり判定
+			this.collisionX(mapChip,this.posX + this.addPosX,mario);
+			this.posX += this.addPosX;
+			// 移動したのでマップ座標更新
+			this.updateMapPositionX(this.posX);
 		}
+		
+		// animation
+		if(this.animCnt++ >= 12){
+			this.animCnt = 0;
+			// 一定以上に達したらアニメーションを更新する
+			if(++this.animX > 3){
+				this.animX = 0;
+			}
+		}
+		// 甲羅状態から移動状態に戻るための処理
+		this.awakeAnimation();
 	}
-	// 甲羅状態から移動状態に戻るための処理
-	this.awakeAnimation();
 }
 
 /**
@@ -495,6 +501,8 @@ Noko.prototype.collisionWithEnemy = function(kuribos,nokos,mario){
  */
 Noko.prototype.update = function(map,mario,kuribos,nokos,moveNum){
 	if(!this.isDead()){
+		// マリオが一定の範囲内に来たら移動フラグを立てる
+		this.checkMove(mario);
 		this.move(map,moveNum,mario);
 		this.gravityAction(map);
 		this.collisionWithMario(map,mario);
@@ -671,4 +679,19 @@ Noko.prototype.increaseSequenceAttackCnt = function(mario){
  */
 Noko.prototype.getScore = function(){
 	return STOMPING_SCORES[this.sequenceAttackCnt];
+}
+
+/**
+ * chapter53
+ * マリオの位置によりノコノコを動かす
+ * 
+ * @param {*} mario 
+ */
+Noko.prototype.checkMove = function(mario){
+	// 一度だけ判定させる
+	if(this.isStop){
+		if(isOffStopFlag(this.posX,mario)){
+			this.isStop = false;
+		}
+	}
 }

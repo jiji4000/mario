@@ -57,3 +57,16 @@ function drawEnemyScore(ctx,texture,oneUpTex,posX,posY,score){
 			}        
 	}
 }
+
+/**
+ * 敵が動ける位置まで来たかを返す
+ * @param {*} posX 
+ * @param {*} mario 
+ */
+function isOffStopFlag(posX,mario){
+	// 画面分野スクロールと一つのマップチップ分だけ距離が縮まったら出現させる
+	if(Math.abs(posX - mario.moveNumX <= 672 - mario.posX)){
+		return true;
+	}
+	return false;
+}

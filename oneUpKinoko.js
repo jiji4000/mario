@@ -211,7 +211,7 @@ OneUpKinoko.prototype.activate = function(posX,posY,dir){
   this.posX = posX;
   this.posY = posY;
   this.state = NORMAL_STATE;
-  this.dir = dir;
+  this.direction = dir;
   this.isFirstAnimation = true;
   this.offsetY = 0;
 }

@@ -25,14 +25,18 @@ function Docan(posX,posY,width,height,mapNumber,mapSizeX,firstDirection,endDirec
 }
 
 /**
- * 描画専用のドカンオブジェクト
+ * 描画専用のドカンオブジェクト 
  * @param {*} posX 
  * @param {*} posY 
+ * @param {*} width 
+ * @param {*} height 
  * @param {*} direction 
  */
-function DocanObj(posX,posY,direction){
+function DocanObj(posX,posY,width,height,direction){
     this.posX = posX;
     this.posY = posY;
+    this.width = width;
+    this.height = height;    
     this.direction = direction;
 }
 
@@ -48,7 +52,11 @@ DocanObj.prototype.draw = function(ctx,texture,scrollX){
             ctx.drawImage(texture,320,96,64,64,this.posX - scrollX,this.posY,MAP_SIZE * 2,MAP_SIZE * 2);		    
             break;
         case DOCAN_UP:
-            ctx.drawImage(texture,448,96,64,64,this.posX - scrollX,this.posY,MAP_SIZE * 2,MAP_SIZE * 2);		    
+            // 土管の下を描画
+            for(var i = 0;i < parseInt(this.height / MAP_SIZE) - 1;++i){
+                ctx.drawImage(texture,448,128,64,32,this.posX - scrollX,this.posY - (i * MAP_SIZE),MAP_SIZE * 2,MAP_SIZE);
+            }
+            ctx.drawImage(texture,448,96,64,32,this.posX - scrollX,this.posY - this.height + MAP_SIZE,MAP_SIZE * 2,MAP_SIZE);
             break;
         case DOCAN_DOWN:
             ctx.drawImage(texture,384,96,64,64,this.posX - scrollX,this.posY,MAP_SIZE * 2,MAP_SIZE * 2);		    

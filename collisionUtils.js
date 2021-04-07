@@ -61,7 +61,7 @@ function replaceEmptyMap(map,mapX,mapY){
   mapNumber : マップチップ番号
 */
 function isKinokoBlock(mapNumber){
-  if(mapNumber == 82){
+  if(mapNumber == 82 || mapNumber == 85){
     return true;
   }
   return false;
@@ -87,7 +87,7 @@ function isBlockMap(mapNumber){
 	mapNumber : マップチップ番号
 */
 function isStarBlock(mapNumber){
-	if(mapNumber == 83){
+	if(mapNumber == 83 || mapNumber == 67 || mapNumber == 68){
 		return true;
 	}
 	return false;
@@ -109,7 +109,7 @@ function isOneUpBlock(mapNumber){
  * @param {*} mapNumber 
  */
 function isHideBlock(mapNumber){
-	if(mapNumber >= 192 && mapNumber <= 192){
+	if(mapNumber >= 192 && mapNumber <= 193){
 		return true;
 	}
 	return false;
@@ -120,7 +120,29 @@ function isHideBlock(mapNumber){
  * @param {*} mapNumber 
  */
 function isHideOneUpBlock(mapNumber){
-	if(mapNumber == 192){
+	if(mapNumber == 192 || mapNumber == 193){
+		return true;
+	}
+	return false;
+}
+
+/**
+ * 対象のマップチップの移動方向を返す
+ * @param {*} mapNumber 
+ */
+function getItemDir(mapNumber){
+	if(mapNumber == 192 || mapNumber == 80 || mapNumber == 67){
+		return LEFT_DIR
+	}
+	return RIGHT_DIR;
+}
+
+/**
+ * 連続コインブロック判定
+ * @param {*} mapNumber 
+ */
+function isSequenceCoinBlock(mapNumber){
+	if(mapNumber == 66){
 		return true;
 	}
 	return false;

@@ -235,7 +235,7 @@ Star.prototype.activate = function(posX,posY,dir){
   this.posX = posX;
   this.posY = posY;
   this.state = NORMAL_STATE;
-  this.dir = dir;
+  this.direction = dir;
   let addX = dir == LEFT_DIR ? -this.ADD_X : this.ADD_X; 
   this.addPosX = addX;
   this.isFirstAnimation = true;

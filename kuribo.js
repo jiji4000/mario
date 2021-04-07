@@ -22,6 +22,8 @@ function Kuribo(posX,posY,dir){
 	this.deadCnt = 0;
 	// chapter47
 	this.score = 100;
+	// chapter53
+	this.isStop = true;
 }
 
 /**
@@ -55,6 +57,8 @@ Kuribo.prototype.init = function(posX,posY,dir,state = NORMAL_STATE){
 	this.deadCnt = 0;
 	// chapter47
 	this.score = 100;
+	// chapter53
+	this.isStop = true;
 }
 
 /*
@@ -224,13 +228,17 @@ Kuribo.prototype.collisionWithMario = function(map,mario){
 */
 Kuribo.prototype.update = function(map,mario,moveNum){
 	if(!this.isDead()){
-		this.move(map,moveNum);
-		// chapter37
-		this.gravityAction(map);
-		this.collisionWithMario(map,mario);
-		// chapter39
-		for(var i = 0;i < mario.MAX_FIRE_NUM;++i){
-			this.collisionWithFire(mario.fire[i]);	
+		// マリオが一定の範囲内に来たら移動フラグを立てる
+		this.checkMove(mario);
+		if(!this.isStop){
+			this.move(map,moveNum);
+			// chapter37
+			this.gravityAction(map);
+			this.collisionWithMario(map,mario);
+			// chapter39
+			for(var i = 0;i < mario.MAX_FIRE_NUM;++i){
+				this.collisionWithFire(mario.fire[i]);	
+			}
 		}
 	}
 	this.deadAction();
@@ -370,5 +378,20 @@ Kuribo.prototype.setDeadCollisionAction = function(){
 Kuribo.prototype.drawScore = function(ctx,texture,oneUpTex,scrollX){
 	if(this.state == DEAD_FIRE_ACTION || this.state == DEAD_ACTION){
 		drawEnemyScore(ctx,texture,oneUpTex,this.posX - scrollX,this.posY,this.score);
+	}
+}
+
+/**
+ * chapter53
+ * マリオの位置によりstopFlagをオフにする
+ * 
+ * @param {*} mario 
+ */
+Kuribo.prototype.checkMove = function(mario){
+	// 一度だけ判定させる
+	if(this.isStop){
+		if(isOffStopFlag(this.posX,mario)){
+			this.isStop = false;
+		}
 	}
 }

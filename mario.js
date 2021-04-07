@@ -30,8 +30,9 @@ function Mario(posX,posY){
 	this.maxDrawMapX = DRAW_MAX_MAP_X;			// 最大の描画範囲X
 	this.minDrawMapX = 0;		// 最小の描画範囲X
 	this.mapScrollX = 0;		// スクロール量X
-	this.moveNumX = 0;			// 総移動量X
-	this.scrollEndX = (100 - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
+	this.moveNumX = posX;			// 総移動量X
+	this.scrollEndX = (215 - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
+
 	// chapter27
 	this.state = NORMAL_STATE;
 	this.height = 32;
@@ -114,10 +115,14 @@ function Mario(posX,posY){
 	// 重力など行動を止めるフラグ
 	this.isMarioStop = false;
 	// ゴールの位置
-	this.goalPosX = 36 * 32;	
+	this.goalPosX = 205 * MAP_SIZE;
 	// chapter51
 	// ゴールアニメーションのためのタイマー
 	this.goalCnt = 0
+	// chapter53
+	// 連続コインの時間
+	this.coinTimer = 0;
+	this.onCoinTimer = false;
 }
 
 /**
@@ -155,7 +160,7 @@ Mario.prototype.init = function(posX,posY){
 	this.minDrawMapX = 0;		// 最小の描画範囲X
 	this.mapScrollX = 0;		// スクロール量X
 	this.moveNumX = 0;			// 総移動量X
-	this.scrollEndX = (100 - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
+	this.scrollEndX = (215 - 10) * MAP_SIZE - HALF_MAP_SIZE;		// スクロールの終わりとなる終点X
 	// chapter27
 	this.state = NORMAL_STATE;
 	this.height = 32;
@@ -212,10 +217,14 @@ Mario.prototype.init = function(posX,posY){
 	this.goalAnimationState = INACTIVE;
 	// 重力など行動を止めるフラグ
 	this.isMarioStop = false;
-	this.goalPosX = 32 * 36;
+	this.goalPosX = 205 * MAP_SIZE;
 
 	// chapter51
 	this.goalCnt = 0
+	// chapter53
+	// 連続コインの時間
+	this.coinTimer = 0;
+	this.onCoinTimer = false;
 }
 
 /*
@@ -432,12 +441,39 @@ Mario.prototype.collisionY = function(map,posY){
 					this.getCoin();
 				}
 
+				// 連続コインブロックだった場合
+				if(isSequenceCoinBlock(map[this.upMapY][mapsX[i]])){
+					// 初回チェック
+					if(!this.onCoinTimer){
+						this.setBlockCoinTimer(true);
+					}
+					else{
+						// タイマーが切れているか
+						if(this.isOverCoinTimer()){
+							// フラグを解除する
+							this.setBlockCoinTimer(false);
+							// ボックスを空にする
+							replaceEmptyBoxMap(map,mapsX[i],this.upMapY);							
+						}
+					}
+					// コインブロック用のアニメーションをセットする
+					var coinX = mapsX[i] * MAP_SIZE;
+					// 一つ上にセットする
+					var coinY = (this.upMapY - 1) * MAP_SIZE - 16;
+					this.setBlockCoinMapAnim(i,coinX,coinY);
+					// ブロックも動かす
+					this.blockMoveAction(mapsX[i],this.upMapY,map);
+					// coinの取得
+					this.getCoin();
+				}
+
 				// キノコブロックだった場合(chapter34&38)
 				if(isKinokoBlock(map[this.upMapY][mapsX[i]])){
 					// chapter40 キノコを有効化する処理を関数にした
 					var kinokoPosX = mapsX[i] * MAP_SIZE;
 					var kinokoPosY = this.upMapY * MAP_SIZE;
-					this.activateKinoko(kinokoPosX,kinokoPosY,LEFT_DIR);
+					let dir = getItemDir(map[this.upMapY][mapsX[i]]);
+					this.activateKinoko(kinokoPosX,kinokoPosY,dir);
 					// ボックスを空にする
 					replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
 				}
@@ -447,7 +483,8 @@ Mario.prototype.collisionY = function(map,posY){
 					// chapter40 キノコを有効化する処理を関数にした
 					let starPosX = mapsX[i] * MAP_SIZE;
 					let starPosY = this.upMapY * MAP_SIZE;
-					this.star.activate(starPosX,starPosY,LEFT_DIR);
+					let dir = getItemDir(map[this.upMapY][mapsX[i]]);
+					this.star.activate(starPosX,starPosY,dir);
 					// ボックスを空にする
 					replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
 				}      
@@ -484,11 +521,12 @@ Mario.prototype.collisionY = function(map,posY){
 					// マリオの頭上が隠しブロックブロックの半分の位置以下
 					if(posY - 32 > blockPosY){
 						// 隠し1up block
-						if((map[this.upMapY][mapsX[i]])){
+						if(isHideOneUpBlock(map[this.upMapY][mapsX[i]])){
 							// 1up kinokoを出現させる
 							let posX = mapsX[i] * MAP_SIZE;
 							let posY = this.upMapY * MAP_SIZE;
-							this.oneUpKinoko.activate(posX,posY,LEFT_DIR);
+							let dir = getItemDir(map[this.upMapY][mapsX[i]]);
+							this.oneUpKinoko.activate(posX,posY,dir);
 							// ボックスを空にする
 							replaceEmptyBoxMap(map,mapsX[i],this.upMapY);
 							// 隠しブロックが出現しないように状態を保存する。
@@ -713,8 +751,10 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 		// 左キーが押されている状態
 		if(!this.keyDisable && !this.isSit){
 			if(gLeftPush){
-				for(var i = 0;i < docans.length;++i){
-					this.docanXEnter(docans[i],LEFT_DIR);
+				if(docans){
+					for(var i = 0;i < docans.length;++i){
+						this.docanXEnter(docans[i],LEFT_DIR);
+					}
 				}
 				if(gSpacePush){
 					this.setIsDash(true);
@@ -729,8 +769,10 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 		// →キーが押されている状態
 		if(!this.keyDisable && !this.isSit){
 			if(gRightPush){
-				for(var i = 0;i < docans.length;++i){
-					this.docanXEnter(docans[i],RIGHT_DIR);
+				if(docans){
+					for(var i = 0;i < docans.length;++i){
+						this.docanXEnter(docans[i],RIGHT_DIR);
+					}
 				}
 				if(gSpacePush){
 					this.setIsDash(true);
@@ -747,8 +789,10 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 		if(gDownPush){
 			if(!this.keyDisable){
 				this.sit();
-				for(var i = 0;i < docans.length;++i){
-					this.docanDownEnter(docans[i]);
+				if(docans){
+					for(var i = 0;i < docans.length;++i){
+						this.docanDownEnter(docans[i]);
+					}
 				}
 			}
 		}
@@ -793,6 +837,10 @@ Mario.prototype.update = function(mapChip,kuribos,nokos,docans){
 		this.oneUpAction();
 		// ゴールアニメーション
 		this.goalAnimationAction(mapChip);
+		// 連続ブロックアニメーション更新
+		this.updateCoinTimer();
+		// 落下判定
+		this.isFall();
 	}
 	// update fire
 	for(var i = 0;i < this.MAX_FIRE_NUM;++i){
@@ -837,6 +885,27 @@ Mario.prototype.blockAction = function(mapIndexX,mapIndexY,isUp,map){
 		this.blockAttackY[this.blockAttackIndex][1] = this.blockAttackY[this.blockAttackIndex][3] = mapIndexY * MAP_SIZE - HALF_MAP_SIZE;				
 		this.blockAttackAddY[this.blockAttackIndex] = 10;
 	}
+	// animationフラグとして利用
+	this.blockAttackCnt[this.blockAttackIndex]++;
+	// 対象のブロック
+	if(++this.blockAttackIndex >= MAX_MAP_BLOCK)this.blockAttackIndex = 0;
+}
+
+
+/**
+ * チビマリオがブロックに頭突きした際にブロックを上下に動かす
+ * @param {*} mapIndexX 
+ * @param {*} mapIndexY 
+ * @param {*} map 
+ */
+Mario.prototype.blockMoveAction = function(mapIndexX,mapIndexY,map){
+	// 対象のマップチップ座標を代入
+	this.blockAttackIndexX[this.blockAttackIndex] = mapIndexX;
+	this.blockAttackIndexY[this.blockAttackIndex] = mapIndexY;
+	this.isBlockUp[this.blockAttackIndex] = true;	// 上昇フラグon
+	this.blockUpX[this.blockAttackIndex] = mapIndexX * MAP_SIZE;
+	this.blockUpY[this.blockAttackIndex] = mapIndexY * MAP_SIZE;
+	this.blockAttackAddY[this.blockAttackIndex] = 8;
 	// animationフラグとして利用
 	this.blockAttackCnt[this.blockAttackIndex]++;
 	// 対象のブロック
@@ -1022,7 +1091,7 @@ Mario.prototype.docanDownEnter = function(docan){
 		// デカくなったときはサイズが変わる
 		let tall = this.height - 32;
 		// y軸
-		if(this.posY + tall == docan.posY){
+		if(this.posY + tall == docan.posY - docan.height + (MAP_SIZE * 2)){
 			this.setDocanParam(docan);
 		}
 	}
@@ -1509,4 +1578,42 @@ Mario.prototype.setGoalPosition = function(goalPosX){
 Mario.prototype.titleReset = function(){
 	this.playerNum = PLAYER_NUM;
 	this.coinNum = 0;
+}
+
+/**
+ * ブロックコインタイマーをセットする
+ * @param {true or false} flag
+ */
+Mario.prototype.setBlockCoinTimer = function(flag){
+	this.onCoinTimer = flag;
+	this.coinTimer = 0;
+}
+
+/**
+ * コインタイマーを更新する
+ */
+Mario.prototype.updateCoinTimer = function(){
+	if(this.onCoinTimer){
+		this.coinTimer++;
+	}
+}
+
+/**
+ * ブロックコインタイマーが終わったかどうかのフラグ
+ */
+Mario.prototype.isOverCoinTimer = function(){
+	if(this.coinTimer >= 180){
+		return true;
+	}
+	return false;
+}
+
+/**
+ * 落下判定を行う
+ * 落下したら死亡判定を立てる
+ */
+Mario.prototype.isFall = function(){
+	if(this.posY >= 512){
+		this.setDeadParam();
+	}
 }
